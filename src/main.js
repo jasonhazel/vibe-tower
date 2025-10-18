@@ -147,6 +147,9 @@ class PlayScene extends Phaser.Scene {
       this.enemyHpBonus = 0;
       this._difficultyTimer = 0;
       this._gameOverShown = false;
+      // Clear tome slots in HUD immediately
+      this._chosenTomes = [];
+      this.game.events.emit('tomes:update', []);
       this.scene.stop('GameOver');
       this.scene.restart();
     });
