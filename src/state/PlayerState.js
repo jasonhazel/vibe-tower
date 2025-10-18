@@ -10,6 +10,7 @@ class PlayerStateImpl {
     this.level = 1; // starting level
     this.xpCurrent = 0; // progress within current level
     this.xpNeeded = 10; // requirement to reach next level
+    this.xpOverflow = 0; // fractional XP carryover for multipliers
     this.healthCurrent = 100;
     this.healthMax = 100;
     this.shield = 0;
@@ -32,6 +33,7 @@ class PlayerStateImpl {
   getLevel() { return this.level; }
   getXpCurrent() { return this.xpCurrent; }
   getXpNeeded() { return this.xpNeeded; }
+  getXpOverflow() { return this.xpOverflow; }
 
   // Stats API
   getStats() { return { ...this.stats }; }
@@ -80,7 +82,14 @@ class PlayerStateImpl {
   addXp(amount) {
     if (!amount || amount <= 0) return;
     const xpMul = this.stats?.xp ?? 1;
-    const grant = Math.max(1, Math.floor(amount * xpMul));
+    const total = amount * xpMul + (this.xpOverflow || 0);
+    let grant = Math.floor(total);
+    if (grant < 1) {
+      grant = 1; // ensure every pickup yields at least 1 XP
+      this.xpOverflow = total - 1;
+    } else {
+      this.xpOverflow = total - grant;
+    }
     this.xpTotal += grant;
     this.xpCurrent += grant;
     let leveled = false;
@@ -94,6 +103,15 @@ class PlayerStateImpl {
     EventBus.emit('xp:update', this.xpTotal);
     EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
     if (leveled) EventBus.emit('player:level', this.level);
+  }
+
+  // Predict XP grant for a given amount using current multiplier and overflow
+  previewXpGrant(amount) {
+    const xpMul = this.stats?.xp ?? 1;
+    const total = amount * xpMul + (this.xpOverflow || 0);
+    let grant = Math.floor(total);
+    if (grant < 1) grant = 1;
+    return grant;
   }
 
   // Health API (integers)
