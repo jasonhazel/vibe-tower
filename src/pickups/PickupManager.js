@@ -1,5 +1,6 @@
 import { playerState } from '../state/PlayerState.js';
 import { gameConfig } from '../state/GameConfig.js';
+import { EventBus } from '../state/EventBus.js';
 import { XpPickup } from './XpPickup.js';
 
 export class PickupManager {
@@ -10,7 +11,6 @@ export class PickupManager {
     // listen for player radius changes
     scene.game?.events?.on?.('pickup:radius', (r) => { this.pickupRadius = r || this.pickupRadius; });
     // also listen on global EventBus to catch non-game event emissions
-    const { EventBus } = require('../state/EventBus.js');
     EventBus.on('pickup:radius', (r) => { this.pickupRadius = r || this.pickupRadius; });
   }
 
