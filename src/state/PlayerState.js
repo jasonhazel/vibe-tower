@@ -56,6 +56,10 @@ class PlayerStateImpl {
   setPickupRadius(radius) {
     this.pickupRadius = Math.max(0, Math.floor(radius));
     EventBus.emit('pickup:radius', this.getPickupRadius());
+    // also forward to Phaser game events if available (scene may listen)
+    if (typeof window !== 'undefined' && window.Phaser && window.Phaser.GAMES?.[0]) {
+      window.Phaser.GAMES[0].events.emit('pickup:radius', this.getPickupRadius());
+    }
   }
 
   getPickupRadius() {

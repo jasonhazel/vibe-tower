@@ -8,6 +8,7 @@ import { gameConfig } from './state/GameConfig.js';
 import { playerState } from './state/PlayerState.js';
 import { Player } from './player/Player.js';
 import { PickupManager } from './pickups/PickupManager.js';
+import { PickupRadiusVisual } from './pickups/PickupRadiusVisual.js';
 
 let GAME_WIDTH = gameConfig.width;
 let GAME_HEIGHT = gameConfig.height;
@@ -27,6 +28,7 @@ class PlayScene extends Phaser.Scene {
     this.centerY = null;
     this._auraRef = null;
     this.pickups = null;
+    this.pickupRadiusVisual = null;
   }
 
   create() {
@@ -57,6 +59,10 @@ class PlayScene extends Phaser.Scene {
 
     // Pickups
     this.pickups = new PickupManager(this);
+    this.pickupRadiusVisual = new PickupRadiusVisual(this, {
+      x: cx, y: cy, radius: playerState.getPickupRadius?.() ?? gameConfig.xpPickup.baseRadius,
+      color: 0x42a5f5, alpha: 0.4, thickness: 1, dash: 10, gap: 6,
+    });
 
     // Weapons
     this.weaponManager = new WeaponManager(this, {
@@ -103,6 +109,7 @@ class PlayScene extends Phaser.Scene {
       this.weaponManager.context.centerX = this.centerX;
       this.weaponManager.context.centerY = this.centerY;
       this._auraRef?.setCenter(this.centerX, this.centerY);
+      this.pickupRadiusVisual?.setCenter(this.centerX, this.centerY);
     });
   }
 
