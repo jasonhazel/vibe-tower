@@ -15,6 +15,7 @@ import { Player } from './entities/player/Player.js';
 import { PickupManager } from './pickups/PickupManager.js';
 import { PickupRadiusVisual } from './pickups/PickupRadiusVisual.js';
 import { hudTheme } from './ui/theme.js';
+import { SaveManager } from './state/SaveManager.js';
 
 let GAME_WIDTH = gameConfig.width;
 let GAME_HEIGHT = gameConfig.height;
@@ -47,9 +48,14 @@ class PlayScene extends Phaser.Scene {
     this.centerX = cx;
     this.centerY = cy;
 
-    // Initialize player health first, then create the tower
-    const maxHp = gameConfig.player.baseHealth;
-    playerState.setHealth(maxHp, maxHp);
+    // Load autosave (if any)
+    const saved = SaveManager.load();
+    if (saved?.player) {
+      playerState.fromJSON(saved.player);
+    } else {
+      const maxHp = gameConfig.player.baseHealth;
+      playerState.setHealth(maxHp, maxHp);
+    }
 
     this.tower = new Player(this, cx, cy, {
       radius: gameConfig.player.radius,
@@ -129,10 +135,19 @@ class PlayScene extends Phaser.Scene {
     } else {
       if (owned.includes('aura')) addAura();
       if (owned.includes('fireball')) addFireball();
+      if (owned.includes('slam')) addSlam();
     }
 
     // Ensure HUD has the initial weapon list even if it mounted later
     this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());
+    
+    // Periodic autosave
+    this.time.addEvent({ delay: 5000, loop: true, callback: () => {
+      const snapshot = {
+        player: playerState.toJSON(),
+      };
+      SaveManager.save(snapshot);
+    }});
     // Handle weapon unlock requests from LevelUpScene
     this.game.events.on('weapon:add', (weaponId) => {
       if (weaponId === 'fireball') {
@@ -217,6 +232,7 @@ class PlayScene extends Phaser.Scene {
       // Reset player progress/state and scene timers
       playerState.reset();
       playerState.setPickupRadius?.(gameConfig.xpPickup.baseRadius);
+      SaveManager.clear();
       this.runMs = 0;
       this.enemyHpBonus = 0;
       this._difficultyTimer = 0;

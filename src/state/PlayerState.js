@@ -220,6 +220,41 @@ class PlayerStateImpl {
   getPickupRadius() {
     return this.pickupRadius;
   }
+
+  // Serialization API
+  toJSON() {
+    return {
+      xpTotal: this.xpTotal,
+      level: this.level,
+      xpCurrent: this.xpCurrent,
+      xpNeeded: this.xpNeeded,
+      xpOverflow: this.xpOverflow,
+      healthCurrent: this.healthCurrent,
+      healthMax: this.healthMax,
+      shield: this.shield,
+      pickupRadius: this.pickupRadius,
+      stats: this.stats,
+      tomeState: this.tomeState,
+      weaponState: this.weaponState,
+    };
+  }
+
+  fromJSON(saved) {
+    if (!saved) return;
+    this.xpTotal = saved.xpTotal ?? this.xpTotal;
+    this.level = saved.level ?? this.level;
+    this.xpCurrent = saved.xpCurrent ?? this.xpCurrent;
+    this.xpNeeded = saved.xpNeeded ?? this.xpNeeded;
+    this.xpOverflow = saved.xpOverflow ?? 0;
+    this.healthCurrent = saved.healthCurrent ?? this.healthCurrent;
+    this.healthMax = saved.healthMax ?? this.healthMax;
+    this.shield = saved.shield ?? this.shield;
+    this.pickupRadius = saved.pickupRadius ?? this.pickupRadius;
+    this.tomeState = saved.tomeState ?? {};
+    this.weaponState = saved.weaponState ?? {};
+    // recompute stats from tomeState
+    this._recomputeStatsFromTomes();
+  }
 }
 
 export const playerState = new PlayerStateImpl();
