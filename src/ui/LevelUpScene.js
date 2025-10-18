@@ -109,6 +109,8 @@ export class LevelUpScene extends Phaser.Scene {
             this.game.events.emit('tome:upgraded', t.id);
           }
         }
+        // Clear deferred XP after selection
+        playerState.finalizeLevelUp?.();
         this.scene.stop();
         this.scene.resume('PlayScene');
       });
@@ -116,6 +118,7 @@ export class LevelUpScene extends Phaser.Scene {
 
     // Skip button
     makeBtn(bx, y + panelH - (btnH + 16), 'Skip', () => {
+      playerState.finalizeLevelUp?.();
       this.game.events.emit('tome:skipped');
       this.scene.stop();
       this.scene.resume('PlayScene');

@@ -29,6 +29,8 @@ class PlayerStateImpl {
     this.tomeState = {};
     // Weapon state: { [weaponId]: { level: number, upgrades: { [k:string]: number } } }
     this.weaponState = {};
+    this._pendingLevelXpHold = false;
+    this._pendingLevelXpRemainder = 0;
   }
 
   getXp() { return this.xpTotal; }
@@ -146,12 +148,17 @@ class PlayerStateImpl {
     this.xpTotal += grant;
     this.xpCurrent += grant;
     let leveled = false;
-    while (this.xpCurrent >= this.xpNeeded) {
-      this.xpCurrent -= this.xpNeeded;
+    // Only process one level here to avoid infinite loop when deferring clear
+    if (this.xpCurrent >= this.xpNeeded) {
+      const remainder = this.xpCurrent - this.xpNeeded;
       this.level += 1;
       // increase requirement by 1.5x each level (ceil to integer)
       this.xpNeeded = Math.ceil(this.xpNeeded * 1.5);
       leveled = true;
+      // Defer clearing XP: keep bar full until finalize
+      this._pendingLevelXpHold = true;
+      this._pendingLevelXpRemainder = remainder;
+      this.xpCurrent = this.xpNeeded; // show full bar
     }
     EventBus.emit('xp:update', this.xpTotal);
     EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
@@ -175,6 +182,14 @@ class PlayerStateImpl {
     let grant = Math.floor(total);
     if (grant < 1) grant = 1;
     return grant;
+  }
+
+  finalizeLevelUp() {
+    if (!this._pendingLevelXpHold) return;
+    this.xpCurrent = Math.max(0, Math.floor(this._pendingLevelXpRemainder || 0));
+    this._pendingLevelXpHold = false;
+    this._pendingLevelXpRemainder = 0;
+    EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
   }
 
   // Health API (integers)
@@ -236,6 +251,8 @@ class PlayerStateImpl {
       stats: this.stats,
       tomeState: this.tomeState,
       weaponState: this.weaponState,
+      pendingLevelXpHold: this._pendingLevelXpHold,
+      pendingLevelXpRemainder: this._pendingLevelXpRemainder,
     };
   }
 
@@ -254,6 +271,8 @@ class PlayerStateImpl {
     this.weaponState = saved.weaponState ?? {};
     // recompute stats from tomeState
     this._recomputeStatsFromTomes();
+    this._pendingLevelXpHold = !!saved.pendingLevelXpHold;
+    this._pendingLevelXpRemainder = Number(saved.pendingLevelXpRemainder || 0);
   }
 }
 

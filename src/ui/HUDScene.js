@@ -159,8 +159,14 @@ export class HUDScene extends Phaser.Scene {
         this.weaponsRow.update(this._lastWeaponIds, drawers);
       }
       // hydrate initial tome icons too
-      const drawersAux = this._lastAuxIds?.map((id) => TomeCatalog.find(t => t.id === id)?.getSlotIconDrawer?.()) || [];
-      this.auxRow.update(this._lastAuxIds || [], drawersAux);
+      try {
+        const ts = playerState.getTomeState?.() || {};
+        const savedIds = Object.keys(ts).filter(id => (ts[id]?.level || 0) > 0);
+        const ids = (play?._chosenTomes && play._chosenTomes.length) ? play._chosenTomes : savedIds;
+        this._lastAuxIds = ids;
+        const drawersAux = ids.map((id) => TomeCatalog.find(t => t.id === id)?.getSlotIconDrawer?.());
+        this.auxRow.update(ids, drawersAux);
+      } catch (_) {}
     } catch (_) {}
     // Stats panel (top-right)
     this.statsPanel = new StatsPanel(this);
@@ -207,12 +213,13 @@ export class HUDScene extends Phaser.Scene {
       this._layoutStatsPanel();
       updateTogglePos();
     });
-    // Restart button (top-left)
+    // Restart button (below stats icon, top-right)
     const restartW = 22, restartH = 18;
     this._restartG = this.add.graphics();
     this._restartText = this.add.text(0, 0, 'R', { fontFamily: 'monospace', fontSize: '12px', color: '#ffffff' }).setOrigin(0.5);
     const drawRestart = () => {
-      const margin = 12; const x = margin; const y = margin;
+      const w = this.scale.gameSize.width; const margin = 12; const toggleW2 = 22; const toggleH2 = 18;
+      const x = w - margin - restartW; const y = margin + toggleH2 + 8;
       this._restartG.clear();
       this._restartG.lineStyle(2, 0xffffff, 1);
       // draw full rectangle path to avoid missing edge due to pixel alignment
@@ -226,10 +233,11 @@ export class HUDScene extends Phaser.Scene {
       this._restartText.setPosition(x + restartW / 2, y + restartH / 2);
     };
     drawRestart();
-    this._restartZone = this.add.zone(12, 12, restartW, restartH).setOrigin(0, 0).setInteractive({ useHandCursor: true });
-    this._restartZone.on('pointerup', () => this.game.events.emit('game:restart'));
+    this._restartZone = this.add.zone(0, 0, restartW, restartH).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+    this._restartZone.on('pointerup', () => this.game.events.emit('ui:gameover'));
     const updateRestartPos = () => {
-      const margin = 12; const x = margin; const y = margin;
+      const w = this.scale.gameSize.width; const margin = 12; const toggleH2 = 18;
+      const x = w - margin - restartW; const y = margin + toggleH2 + 8;
       this._restartZone.setPosition(x, y);
       drawRestart();
     };

@@ -6,6 +6,15 @@ export class WeaponManager {
   }
 
   add(weapon) {
+    // Prevent duplicate single-instance weapons by id
+    try {
+      const id = weapon?.getId?.();
+      if (id && this.weapons.some(w => w.getId?.() === id)) {
+        weapon.destroy?.();
+        this.scene.game.events.emit('weapons:update', this.getWeaponIds());
+        return weapon;
+      }
+    } catch (_) {}
     this.weapons.push(weapon);
     this.scene.game.events.emit('weapons:update', this.getWeaponIds());
     return weapon;

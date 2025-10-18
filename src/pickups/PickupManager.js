@@ -14,6 +14,24 @@ export class PickupManager {
     EventBus.on('pickup:radius', (r) => { this.pickupRadius = r || this.pickupRadius; });
   }
 
+  toJSON() {
+    const out = [];
+    this.group.children.iterate((orb) => {
+      if (!orb || !orb.active) return;
+      out.push({ x: orb.x, y: orb.y, amount: orb.getData('amount') || 1 });
+    });
+    return out;
+  }
+
+  fromJSON(list) {
+    if (!Array.isArray(list)) return;
+    // clear existing
+    try { this.group.clear(true, true); } catch (_) {}
+    for (const o of list) {
+      this.spawnXpAt({ x: o.x, y: o.y }, o.amount || 1);
+    }
+  }
+
   spawnXpAt({ x, y }, amount = 1) {
     // Explosion flash
     const flash = this.scene.add.circle(x, y, 4, 0xffc107, 1);

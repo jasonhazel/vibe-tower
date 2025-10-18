@@ -57,6 +57,37 @@ export class EnemyManager {
     }
     this.instances = next;
   }
+
+  clear() {
+    try { this.group.clear(true, true); } catch (_) {}
+    this.instances = [];
+  }
+
+  toJSON() {
+    const list = [];
+    for (let i = 0; i < this.instances.length; i++) {
+      const inst = this.instances[i];
+      const go = inst.getGO?.();
+      if (!go || !go.active) continue;
+      list.push({
+        type: inst.getId?.() || 'enemy-basic',
+        x: go.x,
+        y: go.y,
+        hp: go.getData('hp') ?? 0,
+        radius: go.getData('radius') ?? 10,
+        speed: inst.speed ?? 40,
+      });
+    }
+    return list;
+  }
+
+  fromJSON(list) {
+    if (!Array.isArray(list)) return;
+    this.clear();
+    for (const e of list) {
+      this.spawnBasicAt({ x: e.x, y: e.y }, { hp: e.hp, radius: e.radius, speed: e.speed });
+    }
+  }
 }
 
 

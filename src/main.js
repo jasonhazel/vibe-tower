@@ -40,6 +40,7 @@ class PlayScene extends Phaser.Scene {
     this._auraRef = null;
     this.pickups = null;
     this.pickupRadiusVisual = null;
+    this._pendingLevelUp = false;
   }
 
   create() {
@@ -55,6 +56,9 @@ class PlayScene extends Phaser.Scene {
       // restore run timer and difficulty if available
       if (typeof saved.runMs === 'number') this.runMs = saved.runMs;
       if (typeof saved.enemyHpBonus === 'number') this.enemyHpBonus = saved.enemyHpBonus;
+      // prevent immediate level-up dialog if we already handled current level
+      this._lastLevel = playerState.getLevel?.() ?? 1;
+      // defer managers until after we construct them below
     } else {
       const maxHp = gameConfig.player.baseHealth;
       playerState.setHealth(maxHp, maxHp);
@@ -65,8 +69,10 @@ class PlayScene extends Phaser.Scene {
       shield: gameConfig.player.baseShield,
     });
 
-    // Initialize pickup radius (can be overridden by perks later)
-    playerState.setPickupRadius?.(gameConfig.xpPickup.baseRadius);
+    // Initialize pickup radius only if no save existed; otherwise stats handler will set it
+    if (!saved?.player) {
+      playerState.setPickupRadius?.(gameConfig.xpPickup.baseRadius);
+    }
 
     // HUD Scene overlay
     this.scene.launch('HUD');
@@ -149,6 +155,10 @@ class PlayScene extends Phaser.Scene {
       this.game.events.emit('tomes:update', chosen);
     } catch (_) {}
 
+    // Restore saved enemies/pickups after managers exist
+    if (saved && Array.isArray(saved.enemies)) this.enemyManager.fromJSON(saved.enemies);
+    if (saved && Array.isArray(saved.pickups)) this.pickups.fromJSON(saved.pickups);
+
     // Ensure HUD has the initial weapon list even if it mounted later
     this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());
     
@@ -156,10 +166,8 @@ class PlayScene extends Phaser.Scene {
     this.time.addEvent({ delay: 5000, loop: true, callback: () => { this._saveSnapshot(); }});
 
     // Save on tab close/navigation
-    window.addEventListener('beforeunload', () => {
-      const snapshot = { player: playerState.toJSON() };
-      SaveManager.save(snapshot);
-    });
+    window.addEventListener('pagehide', () => this._saveSnapshot());
+    window.addEventListener('visibilitychange', () => { if (document.hidden) this._saveSnapshot(); });
     // Handle weapon unlock requests from LevelUpScene
     this.game.events.on('weapon:add', (weaponId) => {
       if (weaponId === 'fireball') {
@@ -172,7 +180,9 @@ class PlayScene extends Phaser.Scene {
       }
       // close level-up state if open
       this._levelUpOpen = false;
+      this._pendingLevelUp = false;
       this.scene.resume();
+      this._saveSnapshot();
     });
 
     // weapon upgrades: just resume level-up state
@@ -180,6 +190,10 @@ class PlayScene extends Phaser.Scene {
       this._levelUpOpen = false;
       this.scene.resume();
     });
+    // UI-triggered game over
+    this.game.events.on('ui:gameover', () => { this._forceGameOver = true; });
+    // UI-triggered game over
+    this.game.events.on('ui:gameover', () => { this._forceGameOver = true; });
 
     // Expose config for UI helpers
     window.gameConfig = gameConfig;
@@ -198,6 +212,8 @@ class PlayScene extends Phaser.Scene {
         this.weaponManager.weapons.forEach(w => w._redrawRange?.());
       }
     });
+    // Apply initial stats to hydrate pickup/aura visuals after listeners are attached
+    EventBus.emit('stats:update', playerState.getStats());
 
     // Resize handling: keep player centered without changing relative positions
     this.scale.on('resize', (gameSize) => {
@@ -257,10 +273,10 @@ class PlayScene extends Phaser.Scene {
     });
 
     // Save immediately on perk selections/unlocks/upgrades
-    this.game.events.on('tome:selected', () => this._saveSnapshot());
-    this.game.events.on('tome:upgraded', () => this._saveSnapshot());
-    this.game.events.on('weapon:add', () => this._saveSnapshot());
-    this.game.events.on('weapon:upgraded', () => this._saveSnapshot());
+    this.game.events.on('tome:selected', () => { this._pendingLevelUp = false; this._saveSnapshot(); });
+    this.game.events.on('tome:upgraded', () => { this._pendingLevelUp = false; this._saveSnapshot(); });
+    this.game.events.on('weapon:add', () => { this._pendingLevelUp = false; this._saveSnapshot(); });
+    this.game.events.on('weapon:upgraded', () => { this._pendingLevelUp = false; this._saveSnapshot(); });
   }
 
   update(time, delta) {
@@ -313,9 +329,10 @@ class PlayScene extends Phaser.Scene {
       }
     }
 
-    // Check game over
-    if (playerState.getHealthCurrent() <= 0 && !this._gameOverShown) {
+    // Check game over (also allow UI-triggered)
+    if ((playerState.getHealthCurrent() <= 0 || this._forceGameOver) && !this._gameOverShown) {
       this._gameOverShown = true;
+      this._forceGameOver = false;
       this.scene.pause();
       this.scene.launch('GameOver', { runMs: this.runMs, xpTotal: playerState.getXp(), level: playerState.getLevel?.() ?? 1 });
     }
@@ -326,6 +343,8 @@ class PlayScene extends Phaser.Scene {
       this._lastLevel = playerState.getLevel?.();
       this.scene.pause();
       this.scene.launch('LevelUp', { chosenIds: this._chosenTomes || [], maxTomes: 4 });
+      this._pendingLevelUp = true;
+      this._saveSnapshot();
     }
   }
 
@@ -345,6 +364,8 @@ class PlayScene extends Phaser.Scene {
         player: playerState.toJSON(),
         runMs: this.runMs,
         enemyHpBonus: this.enemyHpBonus,
+        enemies: this.enemyManager?.toJSON?.() || [],
+        pickups: this.pickups?.toJSON?.() || [],
       };
       SaveManager.save(snapshot);
     } catch (_) {}
@@ -353,7 +374,7 @@ class PlayScene extends Phaser.Scene {
   // Tome selection events
   init() {
     this._chosenTomes = [];
-    this._lastLevel = 1;
+    this._lastLevel = playerState.getLevel?.() ?? 1;
     this._levelUpOpen = false;
 
     // Remove any stale handlers from previous scene instances
