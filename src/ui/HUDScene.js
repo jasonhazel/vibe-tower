@@ -5,6 +5,7 @@ import { ProgressBar } from './components/ProgressBar.js';
 import { SlotRow } from './components/SlotRow.js';
 import { hudTheme } from './theme.js';
 import { StatsPanel } from './components/StatsPanel.js';
+import { TomeCatalog } from '../perks/Tomes.js';
 import { Tooltip } from './components/Tooltip.js';
 
 export class HUDScene extends Phaser.Scene {
@@ -112,11 +113,7 @@ export class HUDScene extends Phaser.Scene {
     const onAux = (ids) => {
       this._lastAuxIds = ids || [];
       // build tome icon drawers from TomeCatalog objects (ids are tome ids)
-      let drawers = [];
-      try {
-        const { TomeCatalog } = require('../perks/Tomes.js');
-        drawers = this._lastAuxIds.map((id) => TomeCatalog.find(t => t.id === id)?.getSlotIconDrawer?.());
-      } catch (_) {}
+      const drawers = this._lastAuxIds.map((id) => TomeCatalog.find(t => t.id === id)?.getSlotIconDrawer?.());
       this.auxRow.update(this._lastAuxIds, drawers);
     };
     this.game.events.on('tomes:update', onAux);
@@ -158,6 +155,9 @@ export class HUDScene extends Phaser.Scene {
         });
         this.weaponsRow.update(this._lastWeaponIds, drawers);
       }
+      // hydrate initial tome icons too
+      const drawersAux = this._lastAuxIds?.map((id) => TomeCatalog.find(t => t.id === id)?.getSlotIconDrawer?.()) || [];
+      this.auxRow.update(this._lastAuxIds || [], drawersAux);
     } catch (_) {}
     // Stats panel (top-right)
     this.statsPanel = new StatsPanel(this);
