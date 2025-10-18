@@ -20,6 +20,7 @@ class PlayerStateImpl {
       damage: 1,
       projectiles: 1,
       attackSpeed: 1,
+      xp: 1,
     };
   }
 
@@ -43,8 +44,10 @@ class PlayerStateImpl {
 
   addXp(amount) {
     if (!amount || amount <= 0) return;
-    this.xpTotal += amount;
-    this.xpCurrent += amount;
+    const xpMul = this.stats?.xp ?? 1;
+    const grant = Math.max(1, Math.floor(amount * xpMul));
+    this.xpTotal += grant;
+    this.xpCurrent += grant;
     let leveled = false;
     while (this.xpCurrent >= this.xpNeeded) {
       this.xpCurrent -= this.xpNeeded;

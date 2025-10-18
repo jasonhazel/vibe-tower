@@ -5,6 +5,7 @@ import { Aura } from './weapons/Aura.js';
 import { EnemyManager } from './enemies/EnemyManager.js';
 import { HUDScene } from './ui/HUDScene.js';
 import { GameOverScene } from './ui/GameOverScene.js';
+import { LevelUpScene } from './ui/LevelUpScene.js';
 import { gameConfig } from './state/GameConfig.js';
 import { playerState } from './state/PlayerState.js';
 import { Player } from './player/Player.js';
@@ -192,6 +193,14 @@ class PlayScene extends Phaser.Scene {
       this.scene.pause();
       this.scene.launch('GameOver', { runMs: this.runMs, xpTotal: playerState.getXp(), level: playerState.getLevel?.() ?? 1 });
     }
+
+    // Handle level up: pause play and show LevelUpScene
+    if (!this._levelUpOpen && this._lastLevel !== playerState.getLevel?.()) {
+      this._levelUpOpen = true;
+      this._lastLevel = playerState.getLevel?.();
+      this.scene.pause();
+      this.scene.launch('LevelUp', { chosenIds: this._chosenTomes || [], maxTomes: 4 });
+    }
   }
 
   // Removed grid helper
@@ -202,6 +211,23 @@ class PlayScene extends Phaser.Scene {
       gameConfig.spawn.maxRadius,
       { hp: gameConfig.enemy.baseHp + this.enemyHpBonus }
     );
+  }
+
+  // Tome selection events
+  init() {
+    this._chosenTomes = [];
+    this._lastLevel = 1;
+    this._levelUpOpen = false;
+    this.game.events.on('tome:selected', (id) => {
+      this._chosenTomes.push(id);
+      this._levelUpOpen = false;
+      this.scene.resume();
+      this.game.events.emit('tomes:update', this._chosenTomes);
+    });
+    this.game.events.on('tome:skipped', () => {
+      this._levelUpOpen = false;
+      this.scene.resume();
+    });
   }
 
   // Weapon logic moved to weapon classes

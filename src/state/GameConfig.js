@@ -9,7 +9,7 @@ export const gameConfig = {
   },
   aura: {
     tickIntervalMs: 250,
-    damagePerTick: 50,
+    damagePerTick: 5,
     radius: 80,
   },
   xpPickup: {
@@ -18,7 +18,7 @@ export const gameConfig = {
   },
   enemy: {
     baseSpeed: 40,
-    baseHp: 1,
+    baseHp: 5,
   },
   player: {
     baseHealth: 100,
