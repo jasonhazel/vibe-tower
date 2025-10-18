@@ -14,6 +14,7 @@ import { EventBus } from './state/EventBus.js';
 import { Player } from './entities/player/Player.js';
 import { PickupManager } from './pickups/PickupManager.js';
 import { PickupRadiusVisual } from './pickups/PickupRadiusVisual.js';
+import { hudTheme } from './ui/theme.js';
 
 let GAME_WIDTH = gameConfig.width;
 let GAME_HEIGHT = gameConfig.height;
@@ -65,9 +66,9 @@ class PlayScene extends Phaser.Scene {
     this.runTimerText = this.add.text(0, 0, '00:00', { fontFamily: 'monospace', fontSize: '16px', color: '#ffffff' }).setOrigin(0.5, 1);
     // initial placement above XP bar
     {
-      const margin = 12; const barH = 12; const slotsSize = 28; const gap = 8;
+      const margin = hudTheme.margin; const barH = hudTheme.bar.height; const slotsSize = hudTheme.slot.size; const gap = hudTheme.gap;
       const xpY = GAME_HEIGHT - margin - slotsSize - gap - barH;
-      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - 10);
+      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - (gap + 8));
     }
 
     // Enemies
@@ -201,9 +202,9 @@ class PlayScene extends Phaser.Scene {
       this._auraRef?.setCenter(this.centerX, this.centerY);
       this.pickupRadiusVisual?.setCenter(this.centerX, this.centerY);
       // position timer above XP bar
-      const margin = 12; const barH = 12; const slotsSize = 28; const gap = 8; // from hudTheme
+      const margin = hudTheme.margin; const barH = hudTheme.bar.height; const slotsSize = hudTheme.slot.size; const gap = hudTheme.gap; // from hudTheme
       const xpY = GAME_HEIGHT - margin - slotsSize - gap - barH; // y of top of XP bar
-      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - 10);
+      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - (gap + 8));
       // update any weapons that support center updates (e.g., Fireball range ring)
       if (this.weaponManager?.weapons) {
         this.weaponManager.weapons.forEach(w => w.setCenter?.(this.centerX, this.centerY));
