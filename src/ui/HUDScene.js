@@ -166,7 +166,7 @@ export class HUDScene extends Phaser.Scene {
     this.statsPanel = new StatsPanel(this);
     this._layoutStatsPanel();
     // Stats toggle (top-right small button)
-    this._statsVisible = true;
+    this._statsVisible = false;
     const toggleW = 22, toggleH = 18;
     this._statsToggleG = this.add.graphics();
     const drawToggle = () => {
@@ -201,7 +201,8 @@ export class HUDScene extends Phaser.Scene {
     this._statsToggleZone.on('pointerout', () => drawToggle());
     this._statsToggleZone.on('pointerup', () => {
       this._statsVisible = !this._statsVisible;
-      this.statsPanel.setVisible(this._statsVisible);
+      if (this._statsVisible) this.statsPanel.slideIn();
+      else this.statsPanel.slideOut();
       this._layoutStatsPanel();
       updateTogglePos();
     });

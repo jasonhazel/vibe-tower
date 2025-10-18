@@ -11,7 +11,7 @@ export class StatsPanel {
 		this.labels = [];
 		this.values = [];
 		this.margin = 10;
-		this.width = 180;
+		this.width = scene.scale.gameSize.width;
 		this.lineH = 18;
 		this.title = scene.add.text(0, 0, 'Stats', { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' });
 		this.container.add(this.title);
@@ -25,6 +25,9 @@ export class StatsPanel {
 		// Refresh when weapons list changes
 		this.onWeapons = () => this._draw(playerState.getStats());
 		this.scene.game?.events?.on('weapons:update', this.onWeapons);
+		// Start hidden off-screen for slide-in
+		this.container.setY(-this.container.height - 20);
+		this.container.setVisible(false);
 	}
 
 	setPosition(x, y) {
@@ -34,6 +37,16 @@ export class StatsPanel {
   setVisible(visible) {
     this.container.setVisible(!!visible);
   }
+
+	slideIn() {
+		this.container.setVisible(true);
+		this.container.y = -this.container.height - 20;
+		this.scene.tweens.add({ targets: this.container, y: 0, duration: 200, ease: 'sine.out' });
+	}
+
+	slideOut() {
+		this.scene.tweens.add({ targets: this.container, y: -this.container.height - 20, duration: 180, ease: 'sine.in', onComplete: () => this.container.setVisible(false) });
+	}
 
 	_draw(stats) {
 		// clear previous labels/values
@@ -127,51 +140,59 @@ export class StatsPanel {
 			}
 		} catch (_) {}
 
-		// Render: XP Prog first, then groups
-		this.title.setPosition(this.margin, this.margin);
-		let y = this.margin + 20;
-		// XP Prog
-		{
-			const labelText = this.scene.add.text(this.margin, y, 'XP Prog:', { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(0, 0);
-			const valueText = this.scene.add.text(this.width - this.margin, y, `${cur}/${need}`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(1, 0);
-			this.container.add(labelText);
-			this.container.add(valueText);
-			this.labels.push(labelText);
-			this.values.push(valueText);
-			y += this.lineH;
-			// small spacing before sections
-			y += Math.floor(this.lineH * 0.2);
+		// Build columns: Player, Weapons, Tomes
+		let weaponEntries = [];
+		let tomeEntries = [];
+		for (let gi = 1; gi < groups.length; gi++) {
+			const g = groups[gi];
+			if (g.name === 'Aura' || g.name === 'Fireball' || g.name === 'Slam') {
+				weaponEntries.push([`— ${g.name} —`, '']);
+				for (const e of g.entries) weaponEntries.push(e);
+			} else if (g.name !== 'Player') {
+				// tomes
+				tomeEntries.push([`— ${g.name} —`, '']);
+				for (const e of g.entries) tomeEntries.push(e);
+			}
 		}
 
-		for (let gi = 0; gi < groups.length; gi++) {
-			const group = groups[gi];
-			// Section header for each group
-			const header = this.scene.add.text(this.margin, y, group.name, { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(0, 0);
-			this.container.add(header);
-			this.labels.push(header);
-			y += Math.floor(this.lineH * 0.8);
-			for (let i = 0; i < group.entries.length; i++) {
-				const [k, v] = group.entries[i];
-				const labelText = this.scene.add.text(this.margin, y, `${k}:`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(0, 0);
-				const valueText = this.scene.add.text(this.width - this.margin, y, `${v}`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(1, 0);
+		const w = this.scene.scale.gameSize.width;
+		this.width = w;
+		const margin = this.margin;
+		const colGap = 16;
+		const colW = Math.floor((w - margin * 2 - colGap * 2) / 3);
+		const colXs = [margin, margin + colW + colGap, margin + (colW + colGap) * 2];
+		const columns = [playerEntries, weaponEntries, tomeEntries];
+
+		this.title.setPosition(margin, margin);
+		const headerH = 20;
+		const startY = margin + headerH;
+		let panelHeight = startY;
+		for (let ci = 0; ci < columns.length; ci++) {
+			let y = startY;
+			const list = columns[ci];
+			const headerName = ci === 0 ? 'Player' : (ci === 1 ? 'Weapons' : 'Tomes');
+			const hdr = this.scene.add.text(colXs[ci], margin, headerName, { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(0, 0);
+			this.container.add(hdr);
+			this.labels.push(hdr);
+			for (let i = 0; i < list.length; i++) {
+				const [k, v] = list[i];
+				const labelText = this.scene.add.text(colXs[ci], y, `${k}:`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(0, 0);
+				const valueText = this.scene.add.text(colXs[ci] + colW, y, `${v}`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(1, 0);
 				this.container.add(labelText);
 				this.container.add(valueText);
 				this.labels.push(labelText);
 				this.values.push(valueText);
 				y += this.lineH;
 			}
-			if (gi < groups.length - 1) {
-				// spacing between sections
-				y += Math.floor(this.lineH * 0.4);
-			}
+			panelHeight = Math.max(panelHeight, y);
 		}
 
-		const height = Math.ceil(y + this.margin);
+		const height = Math.ceil(panelHeight + margin);
 		this.bg.clear();
 		this.bg.fillStyle(0x151515, 0.7);
-		this.bg.fillRoundedRect(0, 0, this.width, height, 8);
+		this.bg.fillRect(0, 0, this.width, height);
 		this.bg.lineStyle(1, 0x444444, 1);
-		this.bg.strokeRoundedRect(0, 0, this.width, height, 8);
+		this.bg.strokeRect(0, 0, this.width, height);
 	}
 
 	destroy() {
