@@ -89,12 +89,12 @@ export class PickupManager {
       ease: 'quad.in',
       duration,
       onComplete: () => {
-        const x = orb.x, y = orb.y;
         if (orb.active) orb.destroy();
         // Show floating XP gain text (uses current multiplier for display)
         const xpMul = playerState.getStats?.().xp || 1;
         const granted = Math.max(1, Math.floor(amount * xpMul));
-        this._showXpText(x, y, granted);
+        // Display above the player rather than the orb
+        this._showXpText(playerX, playerY - 24, granted);
         playerState.addXp(amount);
       },
     });
