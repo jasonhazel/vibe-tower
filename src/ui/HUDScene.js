@@ -32,6 +32,8 @@ export class HUDScene extends Phaser.Scene {
     this._auxSlotSize = 28;
     this._auxSlotGap = 6;
     this.tooltip = null;
+    // debug
+    this._debugTomeButtons = [];
   }
 
   create() {
@@ -173,6 +175,9 @@ export class HUDScene extends Phaser.Scene {
     const onResize = () => { this._layoutBottomHud(); this._layoutStatsPanel(); this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw(); this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw(); };
     this.scale.on('resize', onResize);
     this.handlers.push(['__scale_resize__', onResize]);
+
+    // Debug admin: tome grant buttons (upper-left)
+    this._renderDebugTomeButtons();
   }
 
   shutdown() {
@@ -191,6 +196,11 @@ export class HUDScene extends Phaser.Scene {
       else if (evt === 'weapons:update') this.game?.events?.off(evt, fn);
       else if (evt === 'tomes:update') this.game?.events?.off(evt, fn);
       else EventBus.off(evt, fn);
+    }
+    // cleanup debug buttons
+    if (this._debugTomeButtons?.length) {
+      this._debugTomeButtons.forEach(b => { b.g?.destroy(); b.txt?.destroy(); b.zone?.destroy(); });
+      this._debugTomeButtons = [];
     }
   }
 
@@ -255,6 +265,49 @@ export class HUDScene extends Phaser.Scene {
     const w = this.scale.gameSize.width;
     const margin = 12;
     this.statsPanel.setPosition(w - this.statsPanel.width - margin, margin);
+  }
+
+  _renderDebugTomeButtons() {
+    // clear existing
+    if (this._debugTomeButtons?.length) {
+      this._debugTomeButtons.forEach(b => { b.g?.destroy(); b.txt?.destroy(); b.zone?.destroy(); });
+      this._debugTomeButtons = [];
+    }
+    const w = this.scale.gameSize.width;
+    const margin = 8;
+    const bw = 150, bh = 22;
+    const x = margin, startY = margin;
+
+    const tomeState = playerState.getTomeState?.() || {};
+    const ownedIds = Object.keys(tomeState).filter(id => tomeState[id]?.level > 0);
+    const unowned = TomeCatalog.filter(t => !ownedIds.includes(t.id));
+
+    const makeBtn = (bx, by, label, onClick) => {
+      const g = this.add.graphics();
+      const draw = (bg = 0x2a2a2a, stroke = 0x607d8b) => {
+        g.clear();
+        g.fillStyle(bg, 0.9);
+        g.fillRoundedRect(bx, by, bw, bh, 6);
+        g.lineStyle(1, stroke, 1);
+        g.strokeRoundedRect(bx, by, bw, bh, 6);
+      };
+      draw();
+      const txt = this.add.text(bx + 8, by + bh / 2, label, { fontFamily: 'monospace', fontSize: '12px', color: '#ffffff' }).setOrigin(0, 0.5);
+      const zone = this.add.zone(bx, by, bw, bh).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+      zone.on('pointerover', () => draw(0x333b3f));
+      zone.on('pointerout', () => draw());
+      zone.on('pointerdown', () => draw(0x1e2427));
+      zone.on('pointerup', () => { draw(); onClick?.(); });
+      this._debugTomeButtons.push({ g, txt, zone });
+    };
+
+    unowned.forEach((t, i) => {
+      makeBtn(x, startY + i * (bh + 6), `Add ${t.name}`, () => {
+        t.apply(playerState);
+        this.game.events.emit('tome:selected', t.id);
+        this._renderDebugTomeButtons();
+      });
+    });
   }
 
   _wireSlotTooltips(innerX, slotsY, size, gap, innerW) {
