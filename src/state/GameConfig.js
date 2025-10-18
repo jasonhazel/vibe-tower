@@ -16,13 +16,13 @@ export const gameConfig = {
     baseDamage: 10,
     projectileSpeed: 260,
     range: 160, // base targeting range
-    baseCooldownMs: 5000,
+    baseCooldownMs: 2500,
     radius: 4,
   },
   slam: {
-    baseDamage: 14,
-    baseCooldownMs: 2200,
-    maxRadius: 180,
+    baseDamage: 15,
+    baseCooldownMs: 5000,
+    maxRadius: 110,
     growthSpeed: 360, // px per second
   },
   xpPickup: {

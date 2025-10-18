@@ -295,6 +295,7 @@ class PlayScene extends Phaser.Scene {
       this.game.events.off('tome:selected', this._onTomeSelected);
       this.game.events.off('tome:upgraded', this._onTomeUpgraded);
       this.game.events.off('tome:skipped', this._onTomeSkipped);
+      this.game.events.off('weapon:add', this._onWeaponAdded);
     }
 
     this._onTomeSelected = (id) => {
@@ -312,10 +313,16 @@ class PlayScene extends Phaser.Scene {
       this._levelUpOpen = false;
       this.scene.resume();
     };
+    this._onWeaponAdded = (_weaponId) => {
+      // Level-up finished via weapon unlock
+      this._levelUpOpen = false;
+      this.scene.resume();
+    };
 
     this.game.events.on('tome:selected', this._onTomeSelected);
     this.game.events.on('tome:upgraded', this._onTomeUpgraded);
     this.game.events.on('tome:skipped', this._onTomeSkipped);
+    this.game.events.on('weapon:add', this._onWeaponAdded);
     this._tomeHandlersAttached = true;
   }
 

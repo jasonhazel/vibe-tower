@@ -7,7 +7,12 @@ export class CheatMenu {
 		this.buttons = [];
 		this._onTomesUpdate = () => this.render();
 		this._onResize = () => this.render();
+		this._onLevelClosed = () => this.render();
 		this.scene.game?.events?.on('tomes:update', this._onTomesUpdate);
+		this.scene.game?.events?.on('weapon:add', this._onLevelClosed);
+		this.scene.game?.events?.on('tome:selected', this._onLevelClosed);
+		this.scene.game?.events?.on('tome:upgraded', this._onLevelClosed);
+		this.scene.game?.events?.on('tome:skipped', this._onLevelClosed);
 		this.scene.scale?.on('resize', this._onResize);
 		this.render();
 	}
@@ -18,6 +23,10 @@ export class CheatMenu {
 		}
 		this.buttons = [];
 		this.scene.game?.events?.off('tomes:update', this._onTomesUpdate);
+		this.scene.game?.events?.off('weapon:add', this._onLevelClosed);
+		this.scene.game?.events?.off('tome:selected', this._onLevelClosed);
+		this.scene.game?.events?.off('tome:upgraded', this._onLevelClosed);
+		this.scene.game?.events?.off('tome:skipped', this._onLevelClosed);
 		this.scene.scale?.off('resize', this._onResize);
 	}
 
