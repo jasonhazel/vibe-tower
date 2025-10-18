@@ -18,9 +18,9 @@ export class LevelUpScene extends Phaser.Scene {
     const y = (h - panelH) / 2;
     const panel = this.add.graphics();
     panel.fillStyle(0x1e1e1e, 0.95);
-    panel.fillRoundedRect(x, y, panelW, panelH, 12);
+    panel.fillRect(x, y, panelW, panelH);
     panel.lineStyle(2, 0x8bc34a, 1);
-    panel.strokeRoundedRect(x, y, panelW, panelH, 12);
+    panel.strokeRect(x, y, panelW, panelH);
 
     this.add.text(w / 2, y + 18, 'Choose a Perk', { fontFamily: 'monospace', fontSize: '18px', color: '#ffffff' }).setOrigin(0.5);
 
@@ -63,18 +63,19 @@ export class LevelUpScene extends Phaser.Scene {
     }
 
     const bw = Math.min(360, panelW - 40); // equal width buttons, stacked
+    const btnH = 44;
     const bx = Math.floor(w / 2 - bw / 2);
     const by = y + 54;
 
     const makeBtn = (bx, by, label, onClick) => {
-      const bh = 44;
+      const bh = btnH;
       const g = this.add.graphics();
       const draw = (bg = 0x263238, stroke = 0x8bc34a) => {
         g.clear();
         g.fillStyle(bg, 1);
-        g.fillRoundedRect(bx, by, bw, bh, 8);
+        g.fillRect(bx, by, bw, bh);
         g.lineStyle(2, stroke, 1);
-        g.strokeRoundedRect(bx, by, bw, bh, 8);
+        g.strokeRect(bx, by, bw, bh);
       };
       draw();
       const txt = this.add.text(bx + bw / 2, by + bh / 2, label, { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff', wordWrap: { width: bw - 24 } }).setOrigin(0.5);
@@ -101,7 +102,7 @@ export class LevelUpScene extends Phaser.Scene {
     });
 
     // Skip button
-    makeBtn(bx, Math.min(y + panelH - 56, by + items.length * 52 + 8), 'Skip', () => {
+    makeBtn(bx, y + panelH - (btnH + 16), 'Skip', () => {
       this.game.events.emit('tome:skipped');
       this.scene.stop();
       this.scene.resume('PlayScene');
