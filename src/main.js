@@ -19,6 +19,10 @@ class PlayScene extends Phaser.Scene {
     this.enemies = null;
     this.spawnTimer = 0;
     this.spawnIntervalMs = gameConfig.spawnIntervalMs;
+    this.runMs = 0;
+    this.enemyHpBonus = 0; // increases over time
+    this.difficultyTickMs = 10000; // every 10s
+    this._difficultyTimer = 0;
     // XP is tracked in playerState
     this.weaponManager = null;
     this.enemyManager = null;
@@ -52,6 +56,9 @@ class PlayScene extends Phaser.Scene {
 
     // HUD Scene overlay
     this.scene.launch('HUD');
+
+    // Run timer text (top center)
+    this.runTimerText = this.add.text(GAME_WIDTH / 2, 12, '00:00', { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' }).setOrigin(0.5, 0);
 
     // Enemies
     this.enemyManager = new EnemyManager(this, { centerX: cx, centerY: cy });
@@ -131,6 +138,18 @@ class PlayScene extends Phaser.Scene {
     const { x: px, y: py } = this.tower.getCenter();
     this.pickups.update(px, py);
 
+    // Run timer and difficulty scaling
+    this.runMs += delta;
+    this._difficultyTimer += delta;
+    if (this._difficultyTimer >= this.difficultyTickMs) {
+      this._difficultyTimer = 0;
+      this.enemyHpBonus += 1;
+    }
+    const totalSeconds = Math.floor(this.runMs / 1000);
+    const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const ss = String(totalSeconds % 60).padStart(2, '0');
+    this.runTimerText.setText(`${mm}:${ss}`);
+
     // Tower contact damage tick
     this.contactTickTimer += delta;
     if (this.contactTickTimer >= gameConfig.player.contactTickMs) {
@@ -145,7 +164,11 @@ class PlayScene extends Phaser.Scene {
   // Removed grid helper
 
   spawnEnemy() {
-    this.enemyManager.spawnAroundPlayer(gameConfig.spawn.minRadius, gameConfig.spawn.maxRadius);
+    this.enemyManager.spawnAroundPlayer(
+      gameConfig.spawn.minRadius,
+      gameConfig.spawn.maxRadius,
+      { hp: gameConfig.enemy.baseHp + this.enemyHpBonus }
+    );
   }
 
   // Weapon logic moved to weapon classes
