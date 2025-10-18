@@ -4,6 +4,7 @@ import { gameConfig } from '../state/GameConfig.js';
 import { ProgressBar } from './components/ProgressBar.js';
 import { SlotRow } from './components/SlotRow.js';
 import { hudTheme } from './theme.js';
+import { StatsPanel } from './components/StatsPanel.js';
 
 export class HUDScene extends Phaser.Scene {
   constructor() {
@@ -23,6 +24,7 @@ export class HUDScene extends Phaser.Scene {
     this.avatarGfx = null;
     this.levelText = null;
     this.levelBadge = null; // Graphics circle behind level text
+    this.statsPanel = null;
     // Right-side equip slots (e.g., tomes)
     this.auxSlots = [];
     this._auxSlotSize = 28;
@@ -120,13 +122,16 @@ export class HUDScene extends Phaser.Scene {
 
     // Bottom HUD layout
     this._layoutBottomHud();
+    // Stats panel (top-right)
+    this.statsPanel = new StatsPanel(this);
+    this._layoutStatsPanel();
     // initialize values
     this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw();
     this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw();
 
     // Avatar/level removed
 
-    const onResize = () => { this._layoutBottomHud(); this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw(); this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw(); };
+    const onResize = () => { this._layoutBottomHud(); this._layoutStatsPanel(); this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw(); this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw(); };
     this.scale.on('resize', onResize);
     this.handlers.push(['__scale_resize__', onResize]);
   }
@@ -202,6 +207,13 @@ export class HUDScene extends Phaser.Scene {
     this.levelBadge.lineStyle(2, 0x90caf9, 0.9);
     this.levelBadge.strokeCircle(cx, cy, r);
     this.levelText.setPosition(cx, cy);
+  }
+
+  _layoutStatsPanel() {
+    if (!this.statsPanel) return;
+    const w = this.scale.gameSize.width;
+    const margin = 12;
+    this.statsPanel.setPosition(w - this.statsPanel.width - margin, margin);
   }
 }
 

@@ -14,12 +14,32 @@ class PlayerStateImpl {
     this.healthMax = 100;
     this.shield = 0;
     this.pickupRadius = null; // null -> use gameConfig default
+    // Stat multipliers (tuned via perks)
+    this.stats = {
+      area: 1,
+      damage: 1,
+      projectiles: 1,
+      attackSpeed: 1,
+    };
   }
 
   getXp() { return this.xpTotal; }
   getLevel() { return this.level; }
   getXpCurrent() { return this.xpCurrent; }
   getXpNeeded() { return this.xpNeeded; }
+
+  // Stats API
+  getStats() { return { ...this.stats }; }
+  setStat(name, value) {
+    if (!(name in this.stats)) return;
+    const v = Math.max(0, value);
+    this.stats[name] = v;
+    EventBus.emit('stats:update', this.getStats());
+  }
+  modStat(name, delta) {
+    if (!(name in this.stats)) return;
+    this.setStat(name, this.stats[name] + delta);
+  }
 
   addXp(amount) {
     if (!amount || amount <= 0) return;

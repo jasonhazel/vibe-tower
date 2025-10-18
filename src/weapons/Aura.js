@@ -37,7 +37,9 @@ export class Aura extends WeaponBase {
       const dy = enemy.y - centerY;
       const distSq = dx * dx + dy * dy;
       if (distSq <= radiusSq) {
-        const hp = enemy.getData('hp') - this.damagePerTick;
+        // Apply player damage multiplier
+        const dmg = Math.max(0, Math.floor(this.damagePerTick * (window?.playerState?.getStats?.().damage || 1)));
+        const hp = enemy.getData('hp') - (dmg || this.damagePerTick);
         enemy.setData('hp', hp);
         if (hp <= 0) toRemove.push(enemy);
       }
