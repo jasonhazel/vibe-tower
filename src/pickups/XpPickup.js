@@ -6,8 +6,8 @@ export class XpPickup extends PickupBase {
     const size = 10;
     const rect = scene.add.rectangle(x, y, size, size, 0x42a5f5);
     rect.setAngle(45);
-    // idle bob
-    scene.tweens.add({ targets: rect, y: y - 3, yoyo: true, repeat: -1, duration: 600, ease: 'sine.inOut' });
+    // one-time bounce
+    scene.tweens.add({ targets: rect, y: y - 3, yoyo: true, repeat: 0, duration: 300, ease: 'sine.out' });
     rect.setData('type', 'xp');
     rect.setData('amount', amount);
     this.go = rect;
