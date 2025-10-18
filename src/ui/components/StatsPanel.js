@@ -40,12 +40,18 @@ export class StatsPanel {
 
 	slideIn() {
 		this.container.setVisible(true);
-		this.container.y = -this.container.height - 20;
-		this.scene.tweens.add({ targets: this.container, y: 0, duration: 200, ease: 'sine.out' });
+		// compute latest layout height before animating
+		const prevY = this.container.y;
+		this.container.y = 0; // temp to draw
+		this._draw(playerState.getStats());
+		const h = this.bg?.geom?.height || this.container.getBounds().height || 160;
+		this.container.y = -h - 20;
+		this.scene.tweens.add({ targets: this.container, y: 0, duration: 220, ease: 'sine.out' });
 	}
 
 	slideOut() {
-		this.scene.tweens.add({ targets: this.container, y: -this.container.height - 20, duration: 180, ease: 'sine.in', onComplete: () => this.container.setVisible(false) });
+		const h = this.bg?.geom?.height || this.container.getBounds().height || 160;
+		this.scene.tweens.add({ targets: this.container, y: -h - 20, duration: 180, ease: 'sine.in', onComplete: () => this.container.setVisible(false) });
 	}
 
 	_draw(stats) {
@@ -158,7 +164,7 @@ export class StatsPanel {
 		const w = this.scene.scale.gameSize.width;
 		this.width = w;
 		const margin = this.margin;
-		const colGap = 16;
+		const colGap = 24;
 		const colW = Math.floor((w - margin * 2 - colGap * 2) / 3);
 		const colXs = [margin, margin + colW + colGap, margin + (colW + colGap) * 2];
 		const columns = [playerEntries, weaponEntries, tomeEntries];
@@ -189,7 +195,7 @@ export class StatsPanel {
 
 		const height = Math.ceil(panelHeight + margin);
 		this.bg.clear();
-		this.bg.fillStyle(0x151515, 0.7);
+		this.bg.fillStyle(0x151515, 0.82);
 		this.bg.fillRect(0, 0, this.width, height);
 		this.bg.lineStyle(1, 0x444444, 1);
 		this.bg.strokeRect(0, 0, this.width, height);

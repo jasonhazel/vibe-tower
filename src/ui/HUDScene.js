@@ -308,9 +308,8 @@ export class HUDScene extends Phaser.Scene {
 
   _layoutStatsPanel() {
     if (!this.statsPanel) return;
-    const w = this.scale.gameSize.width;
-    const margin = 12;
-    this.statsPanel.setPosition(w - this.statsPanel.width - margin, margin);
+    // Full-width panel anchored at top; x managed internally with padding
+    this.statsPanel.setPosition(0, 0);
   }
 
   _wireSlotTooltips(innerX, slotsY, size, gap, innerW) {
