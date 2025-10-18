@@ -115,6 +115,14 @@ class PlayScene extends Phaser.Scene {
 
     // Ensure HUD has the initial weapon list even if it mounted later
     this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());
+    // Handle weapon unlock requests from LevelUpScene
+    this.game.events.on('weapon:add', (weaponId) => {
+      if (weaponId === 'fireball') {
+        // mark as owned and add instance
+        playerState.addWeaponById('fireball');
+        addFireball();
+      }
+    });
 
     // Expose config for UI helpers
     window.gameConfig = gameConfig;

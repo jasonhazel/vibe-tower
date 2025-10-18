@@ -90,12 +90,22 @@ export class LevelUpScene extends Phaser.Scene {
     // Stacked options
     items.forEach((t, i) => {
       makeBtn(bx, by + i * 52, t.name, () => {
+        // Apply choice
         t.apply(playerState);
-        // Only add to tome slots if this is a new tome, not an upgrade
-        if (!t.isUpgrade) {
-          this.game.events.emit('tome:selected', t.id);
+        // Branch by type
+        if (t.isWeapon) {
+          if (!t.isUpgrade && t.weaponId) {
+            // unlock: ask PlayScene to instantiate and equip
+            this.game.events.emit('weapon:add', t.weaponId);
+          }
+          // weapon upgrades don't change tome slots
         } else {
-          this.game.events.emit('tome:upgraded', t.id);
+          // Tome logic
+          if (!t.isUpgrade) {
+            this.game.events.emit('tome:selected', t.id);
+          } else {
+            this.game.events.emit('tome:upgraded', t.id);
+          }
         }
         this.scene.stop();
         this.scene.resume('PlayScene');
