@@ -78,7 +78,6 @@ export class StatsPanel {
 			const pickupR = Math.floor(basePickup * (stats.pickup || 1) * (stats.area || 1));
 			const auraR = Math.floor(baseAura * (stats.area || 1));
 			playerEntries.push(['Pickup R', String(pickupR)]);
-			playerEntries.push(['Aura R', String(auraR)]);
 		}
 
 		// Groups: player first, then each owned tome, then weapons
@@ -155,8 +154,9 @@ export class StatsPanel {
 				weaponEntries.push([`— ${g.name} —`, '']);
 				for (const e of g.entries) weaponEntries.push(e);
 			} else if (g.name !== 'Player') {
-				// tomes
-				tomeEntries.push([`— ${g.name} —`, '']);
+				// tomes: strip leading "Tome of " from display name
+				const nameClean = String(g.name).replace(/^Tome\s+of\s+/i, '');
+				tomeEntries.push([`— ${nameClean} —`, '']);
 				for (const e of g.entries) tomeEntries.push(e);
 			}
 		}
