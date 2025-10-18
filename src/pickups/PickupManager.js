@@ -8,9 +8,10 @@ export class PickupManager {
     this.group = scene.add.group();
     this.pickupRadius = gameConfig.xpPickup.baseRadius;
     // listen for player radius changes
-    scene.game?.events?.on?.('pickup:radius', (r) => {
-      this.pickupRadius = r || this.pickupRadius;
-    });
+    scene.game?.events?.on?.('pickup:radius', (r) => { this.pickupRadius = r || this.pickupRadius; });
+    // also listen on global EventBus to catch non-game event emissions
+    const { EventBus } = require('../state/EventBus.js');
+    EventBus.on('pickup:radius', (r) => { this.pickupRadius = r || this.pickupRadius; });
   }
 
   spawnXpAt({ x, y }, amount = 1) {

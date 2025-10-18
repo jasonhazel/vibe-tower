@@ -8,6 +8,7 @@ import { GameOverScene } from './ui/GameOverScene.js';
 import { LevelUpScene } from './ui/LevelUpScene.js';
 import { gameConfig } from './state/GameConfig.js';
 import { playerState } from './state/PlayerState.js';
+import { EventBus } from './state/EventBus.js';
 import { Player } from './player/Player.js';
 import { PickupManager } from './pickups/PickupManager.js';
 import { PickupRadiusVisual } from './pickups/PickupRadiusVisual.js';
@@ -91,8 +92,11 @@ class PlayScene extends Phaser.Scene {
     // Ensure HUD has the initial weapon list even if it mounted later
     this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());
 
-    // React to area stat changes to scale aura and pickup radius
-    this.game.events.on('stats:update', (stats) => {
+    // Expose config for UI helpers
+    window.gameConfig = gameConfig;
+
+    // React to stat changes to scale aura and pickup radius
+    EventBus.on('stats:update', (stats) => {
       const areaMul = stats?.area || 1;
       const newAuraR = Math.floor(gameConfig.aura.radius * areaMul);
       this._auraRef?.setRadius(newAuraR);
