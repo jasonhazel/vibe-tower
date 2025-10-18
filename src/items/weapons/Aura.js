@@ -33,16 +33,17 @@ export class Aura extends WeaponBase {
   }
 
   getRuntimeParams(ps) {
-    const stats = ps?.getStats?.() || { area: 1, damage: 1 };
+    const stats = ps?.getStats?.() || { area: 1, damage: 1, attackSpeed: 1 };
     const ws = ps?.getWeaponState?.()?.[this.id] || { upgrades: {} };
     const up = ws.upgrades || {};
     const dmgMult = (stats.damage || 1) * (1 + 0.15 * (up.damage || 0));
     const radiusMult = (stats.area || 1) * (1 + 0.10 * (up.radius || 0));
     const tickMult = Math.pow(0.9, (up.tick || 0)); // 10% faster per upgrade
+    const atk = Math.max(0.1, stats.attackSpeed || 1);
     return {
       damagePerTick: Math.max(1, Math.floor(this.damagePerTick * dmgMult)),
       radius: Math.max(1, Math.floor(this.radius * radiusMult)),
-      cooldownMs: Math.max(60, Math.floor(this.cooldownMs * tickMult)),
+      cooldownMs: Math.max(60, Math.floor((this.cooldownMs * tickMult) / atk)),
     };
   }
 
