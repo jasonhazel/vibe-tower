@@ -170,14 +170,14 @@ export class StatsPanel {
 		const columns = [playerEntries, weaponEntries, tomeEntries];
 
 		this.title.setPosition(margin, margin);
-		const headerH = 20;
+		const headerH = 38; // leave room for title above column headers
 		const startY = margin + headerH;
 		let panelHeight = startY;
 		for (let ci = 0; ci < columns.length; ci++) {
 			let y = startY;
 			const list = columns[ci];
 			const headerName = ci === 0 ? 'Player' : (ci === 1 ? 'Weapons' : 'Tomes');
-			const hdr = this.scene.add.text(colXs[ci], margin, headerName, { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(0, 0);
+			const hdr = this.scene.add.text(colXs[ci], margin + 18, headerName, { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(0, 0);
 			this.container.add(hdr);
 			this.labels.push(hdr);
 			for (let i = 0; i < list.length; i++) {
