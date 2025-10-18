@@ -29,6 +29,7 @@ export class BasicEnemy extends EnemyBase {
     this.bodyGfx = bodyGfx;
     this.hpText = hpText;
     this.go.setData('hp', hp);
+    this.go.setData('radius', this.radius);
 
     // React to HP changes to update label
     this.go.on('changedata-hp', (_obj, value /*, prev */) => {

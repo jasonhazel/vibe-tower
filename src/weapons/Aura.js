@@ -44,9 +44,14 @@ export class Aura extends WeaponBase {
     });
     toRemove.forEach((enemy) => {
       const ex = enemy.x; const ey = enemy.y;
+      const er = enemy.getData('radius') || 10;
       enemy.destroy();
-      // spawn an XP crystal instead of instantly awarding XP
-      spawnXp?.({ x: ex, y: ey }, 1);
+      // slight random offset within enemy radius for where the pickup lands
+      const ang = Math.random() * Math.PI * 2;
+      const r = Math.random() * er;
+      const px = ex + Math.cos(ang) * r;
+      const py = ey + Math.sin(ang) * r;
+      spawnXp?.({ x: px, y: py }, 1);
     });
   }
 
