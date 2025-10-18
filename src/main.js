@@ -91,6 +91,16 @@ class PlayScene extends Phaser.Scene {
     // Ensure HUD has the initial weapon list even if it mounted later
     this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());
 
+    // React to area stat changes to scale aura and pickup radius
+    this.game.events.on('stats:update', (stats) => {
+      const areaMul = stats?.area || 1;
+      const newAuraR = Math.floor(gameConfig.aura.radius * areaMul);
+      this._auraRef?.setRadius(newAuraR);
+      const newPickupR = Math.floor(gameConfig.xpPickup.baseRadius * areaMul);
+      playerState.setPickupRadius?.(newPickupR);
+      this.pickupRadiusVisual?.setRadius?.(newPickupR);
+    });
+
     // Resize handling: keep player centered without changing relative positions
     this.scale.on('resize', (gameSize) => {
       GAME_WIDTH = gameSize.width;

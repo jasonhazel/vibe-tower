@@ -66,6 +66,13 @@ export class Aura extends WeaponBase {
     this.context.centerY = y;
   }
 
+  setRadius(newRadius) {
+    this.radius = Math.max(0, Math.floor(newRadius));
+    this.graphics.clear();
+    this.graphics.lineStyle(2, 0x66bb6a, 0.65);
+    this.graphics.strokeCircle(this.context.centerX, this.context.centerY, this.radius);
+  }
+
   destroy() {
     this.graphics?.destroy();
   }
