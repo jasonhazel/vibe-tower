@@ -52,6 +52,9 @@ class PlayScene extends Phaser.Scene {
     const saved = SaveManager.load();
     if (saved?.player) {
       playerState.fromJSON(saved.player);
+      // restore run timer and difficulty if available
+      if (typeof saved.runMs === 'number') this.runMs = saved.runMs;
+      if (typeof saved.enemyHpBonus === 'number') this.enemyHpBonus = saved.enemyHpBonus;
     } else {
       const maxHp = gameConfig.player.baseHealth;
       playerState.setHealth(maxHp, maxHp);
@@ -138,16 +141,25 @@ class PlayScene extends Phaser.Scene {
       if (owned.includes('slam')) addSlam();
     }
 
+    // Hydrate tome slots in HUD from saved tomeState
+    try {
+      const ts = playerState.getTomeState?.() || {};
+      const chosen = Object.keys(ts).filter(id => (ts[id]?.level || 0) > 0);
+      this._chosenTomes = chosen.slice();
+      this.game.events.emit('tomes:update', chosen);
+    } catch (_) {}
+
     // Ensure HUD has the initial weapon list even if it mounted later
     this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());
     
     // Periodic autosave
-    this.time.addEvent({ delay: 5000, loop: true, callback: () => {
-      const snapshot = {
-        player: playerState.toJSON(),
-      };
+    this.time.addEvent({ delay: 5000, loop: true, callback: () => { this._saveSnapshot(); }});
+
+    // Save on tab close/navigation
+    window.addEventListener('beforeunload', () => {
+      const snapshot = { player: playerState.toJSON() };
       SaveManager.save(snapshot);
-    }});
+    });
     // Handle weapon unlock requests from LevelUpScene
     this.game.events.on('weapon:add', (weaponId) => {
       if (weaponId === 'fireball') {
@@ -243,6 +255,12 @@ class PlayScene extends Phaser.Scene {
       this.scene.stop('GameOver');
       this.scene.restart();
     });
+
+    // Save immediately on perk selections/unlocks/upgrades
+    this.game.events.on('tome:selected', () => this._saveSnapshot());
+    this.game.events.on('tome:upgraded', () => this._saveSnapshot());
+    this.game.events.on('weapon:add', () => this._saveSnapshot());
+    this.game.events.on('weapon:upgraded', () => this._saveSnapshot());
   }
 
   update(time, delta) {
@@ -319,6 +337,17 @@ class PlayScene extends Phaser.Scene {
       gameConfig.spawn.maxRadius,
       { hp: gameConfig.enemy.baseHp + this.enemyHpBonus }
     );
+  }
+
+  _saveSnapshot() {
+    try {
+      const snapshot = {
+        player: playerState.toJSON(),
+        runMs: this.runMs,
+        enemyHpBonus: this.enemyHpBonus,
+      };
+      SaveManager.save(snapshot);
+    } catch (_) {}
   }
 
   // Tome selection events

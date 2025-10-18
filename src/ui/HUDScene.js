@@ -207,6 +207,26 @@ export class HUDScene extends Phaser.Scene {
       this._layoutStatsPanel();
       updateTogglePos();
     });
+    // Restart button (top-left)
+    const restartW = 22, restartH = 18;
+    this._restartG = this.add.graphics();
+    this._restartText = this.add.text(0, 0, 'R', { fontFamily: 'monospace', fontSize: '12px', color: '#ffffff' }).setOrigin(0.5);
+    const drawRestart = () => {
+      const margin = 12; const x = margin; const y = margin;
+      this._restartG.clear();
+      this._restartG.lineStyle(1, 0xffffff, 1);
+      this._restartG.strokeRect(x, y, restartW, restartH);
+      this._restartText.setPosition(x + restartW / 2, y + restartH / 2);
+    };
+    drawRestart();
+    this._restartZone = this.add.zone(12, 12, restartW, restartH).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+    this._restartZone.on('pointerup', () => this.game.events.emit('game:restart'));
+    const updateRestartPos = () => {
+      const margin = 12; const x = margin; const y = margin;
+      this._restartZone.setPosition(x, y);
+      drawRestart();
+    };
+    updateRestartPos();
     // Tooltip
     this.tooltip = new Tooltip(this);
     // initialize values
@@ -215,7 +235,7 @@ export class HUDScene extends Phaser.Scene {
 
     // Avatar/level removed
 
-    const onResize = () => { this._layoutBottomHud(); this._layoutStatsPanel(); this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw(); this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw(); };
+    const onResize = () => { this._layoutBottomHud(); this._layoutStatsPanel(); this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw(); this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw(); updateTogglePos(); updateRestartPos(); };
     this.scale.on('resize', onResize);
     this.handlers.push(['__scale_resize__', onResize]);
 
