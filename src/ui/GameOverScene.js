@@ -41,8 +41,28 @@ export class GameOverScene extends Phaser.Scene {
       this.add.text(w / 2, panelY + 60 + i * 22, stats[i], { fontFamily: 'monospace', fontSize: '14px', color: '#e0e0e0' }).setOrigin(0.5, 0.5);
     }
 
-    const hint = this.add.text(w / 2, panelY + panelH - 28, 'Press R to restart', { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(0.5, 0.5);
-    this.input.keyboard.once('keydown-R', () => {
+    // Restart button
+    const btnW = 140;
+    const btnH = 36;
+    const btnX = w / 2 - btnW / 2;
+    const btnY = panelY + panelH - 54;
+    const btn = this.add.graphics();
+    const drawBtn = (bg = 0x263238, stroke = 0x90caf9) => {
+      btn.clear();
+      btn.fillStyle(bg, 1);
+      btn.fillRoundedRect(btnX, btnY, btnW, btnH, 8);
+      btn.lineStyle(2, stroke, 1);
+      btn.strokeRoundedRect(btnX, btnY, btnW, btnH, 8);
+    };
+    drawBtn();
+    const label = this.add.text(w / 2, btnY + btnH / 2, 'Restart', { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' }).setOrigin(0.5);
+
+    const hit = this.add.zone(btnX, btnY, btnW, btnH).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+    hit.on('pointerover', () => drawBtn(0x2e3b43, 0xace0ff));
+    hit.on('pointerout', () => drawBtn());
+    hit.on('pointerdown', () => drawBtn(0x1b252b, 0x6fb7ff));
+    hit.on('pointerup', () => {
+      drawBtn();
       this.game.events.emit('game:restart');
     });
   }
