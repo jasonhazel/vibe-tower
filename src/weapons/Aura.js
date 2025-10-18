@@ -43,6 +43,7 @@ export class Aura extends WeaponBase {
         const dmg = Math.max(0, Math.floor(this.damagePerTick * dmgMult));
         const hp = enemy.getData('hp') - (dmg || this.damagePerTick);
         enemy.setData('hp', hp);
+        if (dmg > 0) this._showDamage(enemy.x, enemy.y, dmg);
         if (hp <= 0) toRemove.push(enemy);
       }
     });
@@ -77,6 +78,22 @@ export class Aura extends WeaponBase {
 
   destroy() {
     this.graphics?.destroy();
+  }
+
+  _showDamage(x, y, amount) {
+    const txt = this.scene.add.text(x, y - 10, `-${amount}`, {
+      fontFamily: 'monospace',
+      fontSize: '12px',
+      color: '#ef5350',
+    }).setOrigin(0.5).setDepth(900);
+    this.scene.tweens.add({
+      targets: txt,
+      y: y - 24,
+      alpha: { from: 1, to: 0 },
+      duration: 700,
+      ease: 'sine.out',
+      onComplete: () => txt.destroy(),
+    });
   }
 }
 
