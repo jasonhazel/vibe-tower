@@ -153,9 +153,19 @@ class PlayScene extends Phaser.Scene {
     this.contactTickTimer += delta;
     if (this.contactTickTimer >= gameConfig.player.contactTickMs) {
       this.contactTickTimer = 0;
-      const contacts = this._countEnemiesTouchingTower();
-      if (contacts > 0) {
-        this.tower.takeDamage(contacts * gameConfig.player.contactDamagePerEnemy);
+      const touching = this._getEnemiesTouchingTower();
+      for (const enemy of touching) {
+        const hp = Math.max(0, Math.floor(enemy.getData('hp') ?? gameConfig.enemy.baseHp));
+        // Deal damage equal to enemy's remaining HP
+        if (hp > 0) this.tower.takeDamage(hp);
+        // Drop XP crystal on contact death
+        const ex = enemy.x; const ey = enemy.y; const er = enemy.getData('radius') || 10;
+        const ang = Math.random() * Math.PI * 2;
+        const r = Math.random() * er;
+        const px2 = ex + Math.cos(ang) * r;
+        const py2 = ey + Math.sin(ang) * r;
+        this.pickups.spawnXpAt({ x: px2, y: py2 }, 1);
+        enemy.destroy();
       }
     }
   }
@@ -172,21 +182,21 @@ class PlayScene extends Phaser.Scene {
 
   // Weapon logic moved to weapon classes
   
-  _countEnemiesTouchingTower() {
+  _getEnemiesTouchingTower() {
     const { x, y } = this.tower.getCenter();
     const towerRadius = this.tower.radius;
-    const enemyRadius = 6; // approximate half-size of basic enemy (12px)
-    const threshold = towerRadius + enemyRadius;
-    const thresholdSq = threshold * threshold;
-    let count = 0;
+    const touching = [];
     this.enemies.children.iterate((enemy) => {
       if (!enemy) return;
+      const enemyRadius = enemy.getData('radius') || 10;
+      const threshold = towerRadius + enemyRadius;
+      const thresholdSq = threshold * threshold;
       const dx = enemy.x - x;
       const dy = enemy.y - y;
       const distSq = dx * dx + dy * dy;
-      if (distSq <= thresholdSq) count += 1;
+      if (distSq <= thresholdSq) touching.push(enemy);
     });
-    return count;
+    return touching;
   }
 }
 
