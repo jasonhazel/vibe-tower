@@ -89,9 +89,28 @@ export class PickupManager {
       ease: 'quad.in',
       duration,
       onComplete: () => {
+        const x = orb.x, y = orb.y;
         if (orb.active) orb.destroy();
+        // Show floating XP gain text (uses current multiplier for display)
+        const xpMul = playerState.getStats?.().xp || 1;
+        const granted = Math.max(1, Math.floor(amount * xpMul));
+        this._showXpText(x, y, granted);
         playerState.addXp(amount);
       },
+    });
+  }
+
+  _showXpText(x, y, amt) {
+    const txt = this.scene.add.text(x, y, `+${amt} XP`, { fontFamily: 'monospace', fontSize: '12px', color: '#8bc34a' })
+      .setOrigin(0.5)
+      .setDepth(1000);
+    this.scene.tweens.add({
+      targets: txt,
+      y: y - 14,
+      alpha: { from: 1, to: 0 },
+      duration: 1000,
+      ease: 'sine.out',
+      onComplete: () => txt.destroy(),
     });
   }
 }
