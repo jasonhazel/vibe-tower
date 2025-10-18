@@ -32,8 +32,13 @@ export class BasicEnemy extends EnemyBase {
     this.go.setData('radius', this.radius);
 
     // React to HP changes to update label
-    this.go.on('changedata-hp', (_obj, value /*, prev */) => {
-      this.hpText.setText(String(Math.max(0, Math.floor(value))));
+    this.go.on('changedata-hp', (_obj, value, prev) => {
+      const v = Math.max(0, Math.floor(value));
+      this.hpText.setText(String(v));
+      if (prev !== undefined && prev !== null) {
+        const damage = Math.max(0, Math.floor(prev - value));
+        if (damage > 0) this._showDamage(this.go.x, this.go.y, damage);
+      }
     });
 
     // When destroyed externally (e.g., by weapons), clean up
@@ -53,6 +58,21 @@ export class BasicEnemy extends EnemyBase {
     const step = (this.speed * (deltaMs / 1000));
     this.go.x += (dx / len) * step;
     this.go.y += (dy / len) * step;
+  }
+  _showDamage(x, y, amount) {
+    const txt = this.scene.add.text(x, y - 10, `-${amount}`, {
+      fontFamily: 'monospace',
+      fontSize: '12px',
+      color: '#ef5350',
+    }).setOrigin(0.5).setDepth(900);
+    this.scene.tweens.add({
+      targets: txt,
+      y: y - 24,
+      alpha: { from: 1, to: 0 },
+      duration: 700,
+      ease: 'sine.out',
+      onComplete: () => txt.destroy(),
+    });
   }
 }
 
