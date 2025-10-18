@@ -6,20 +6,36 @@ class PlayerStateImpl {
   }
 
   reset() {
-    this.xp = 0;
+    this.xpTotal = 0;
+    this.level = 1; // starting level
+    this.xpCurrent = 0; // progress within current level
+    this.xpNeeded = 10; // requirement to reach next level
     this.healthCurrent = 100;
     this.healthMax = 100;
     this.shield = 0;
     this.pickupRadius = null; // null -> use gameConfig default
   }
 
-  getXp() {
-    return this.xp;
-  }
+  getXp() { return this.xpTotal; }
+  getLevel() { return this.level; }
+  getXpCurrent() { return this.xpCurrent; }
+  getXpNeeded() { return this.xpNeeded; }
 
   addXp(amount) {
-    this.xp += amount;
-    EventBus.emit('xp:update', this.xp);
+    if (!amount || amount <= 0) return;
+    this.xpTotal += amount;
+    this.xpCurrent += amount;
+    let leveled = false;
+    while (this.xpCurrent >= this.xpNeeded) {
+      this.xpCurrent -= this.xpNeeded;
+      this.level += 1;
+      // increase requirement by 12% each level (ceil to integer)
+      this.xpNeeded = Math.ceil(this.xpNeeded * 1.12);
+      leveled = true;
+    }
+    EventBus.emit('xp:update', this.xpTotal);
+    EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
+    if (leveled) EventBus.emit('player:level', this.level);
   }
 
   // Health API (integers)

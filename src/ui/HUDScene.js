@@ -22,6 +22,7 @@ export class HUDScene extends Phaser.Scene {
     this._xpMaxPlaceholder = 100;
     this.avatarGfx = null;
     this.levelText = null;
+    this.levelBadge = null; // Graphics circle behind level text
     // Right-side equip slots (e.g., tomes)
     this.auxSlots = [];
     this._auxSlotSize = 28;
@@ -78,6 +79,14 @@ export class HUDScene extends Phaser.Scene {
     this.healthText = null;
     this.shieldText = null;
 
+    // Level badge in bottom center
+    this.levelBadge = this.add.graphics();
+    this.levelText = this.add.text(0, 0, String(playerState.getLevel?.() ?? 1), {
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      color: '#ffffff',
+    }).setOrigin(0.5);
+
     const onWeapons = (ids) => { this._lastWeaponIds = ids || []; this.weaponsRow.update(this._lastWeaponIds); };
     this.game.events.on('weapons:update', onWeapons);
     this.handlers.push(['weapons:update', onWeapons]);
@@ -92,12 +101,19 @@ export class HUDScene extends Phaser.Scene {
     EventBus.on('health:update', onHealth);
     this.handlers.push(['health:update', onHealth]);
 
-    const onXp = (xp) => {
-      const current = xp % this._xpMaxPlaceholder;
-      this.xpBar.setValue(current, this._xpMaxPlaceholder).draw();
+    const onXpProgress = ({ current, needed }) => {
+      this.xpBar.setValue(current, needed).draw();
     };
-    EventBus.on('xp:update', onXp);
-    this.handlers.push(['xp:update', onXp]);
+    EventBus.on('xp:progress', onXpProgress);
+    this.handlers.push(['xp:progress', onXpProgress]);
+
+    const onLevel = (lvl) => {
+      this.levelText.setText(String(lvl));
+      // small pulse
+      this.tweens.add({ targets: this.levelText, scale: 1.25, duration: 100, yoyo: true, ease: 'sine.out' });
+    };
+    EventBus.on('player:level', onLevel);
+    this.handlers.push(['player:level', onLevel]);
 
     // Pin to camera
     this.cameras.main.setScroll(0, 0);
@@ -106,11 +122,11 @@ export class HUDScene extends Phaser.Scene {
     this._layoutBottomHud();
     // initialize values
     this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw();
-    this.xpBar.setValue(playerState.getXp() % this._xpMaxPlaceholder, this._xpMaxPlaceholder).draw();
+    this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw();
 
     // Avatar/level removed
 
-    const onResize = () => { this._layoutBottomHud(); this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw(); this.xpBar.setValue(playerState.getXp() % this._xpMaxPlaceholder, this._xpMaxPlaceholder).draw(); };
+    const onResize = () => { this._layoutBottomHud(); this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw(); this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw(); };
     this.scale.on('resize', onResize);
     this.handlers.push(['__scale_resize__', onResize]);
   }
@@ -175,6 +191,17 @@ export class HUDScene extends Phaser.Scene {
 
     this._healthRect = { x: innerX, y: healthY, w: innerW, h: barH };
     this._xpRect = { x: innerX, y: xpY, w: innerW, h: barH };
+
+    // Level badge centered between slot rows
+    const cx = w / 2;
+    const cy = slotsY + size / 2;
+    const r = 14;
+    this.levelBadge.clear();
+    this.levelBadge.fillStyle(0x263238, 0.9);
+    this.levelBadge.fillCircle(cx, cy, r);
+    this.levelBadge.lineStyle(2, 0x90caf9, 0.9);
+    this.levelBadge.strokeCircle(cx, cy, r);
+    this.levelText.setPosition(cx, cy);
   }
 }
 
