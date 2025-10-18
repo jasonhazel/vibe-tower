@@ -37,7 +37,7 @@ export class StatsPanel {
 		this.labels.length = 0;
 		this.values.length = 0;
 
-		// Player block
+		// Player block (without XP Prog)
 		const playerEntries = [
 			['Area', stats.area?.toFixed?.(2) ?? String(stats.area)],
 			['Damage', stats.damage?.toFixed?.(2) ?? String(stats.damage)],
@@ -48,7 +48,6 @@ export class StatsPanel {
 		];
 		const cur = playerState.getXpCurrent?.() ?? 0;
 		const need = playerState.getXpNeeded?.() ?? 0;
-		playerEntries.push(['XP Prog', `${cur}/${need}`]);
 		if (this.scene && this.scene.scale) {
 			const basePickup = window?.gameConfig?.xpPickup?.baseRadius || 60;
 			const baseAura = window?.gameConfig?.aura?.radius || 100;
@@ -58,7 +57,7 @@ export class StatsPanel {
 			playerEntries.push(['Aura R', String(auraR)]);
 		}
 
-		// Groups: player first, then weapons with headers (no harsh lines)
+		// Groups: player first, then weapons with headers
 		const groups = [{ name: 'Player', entries: playerEntries }];
 		try {
 			const play = this.scene.scene.get('PlayScene');
@@ -91,20 +90,29 @@ export class StatsPanel {
 			}
 		} catch (_) {}
 
-		// Render
+		// Render: XP Prog first, then groups
 		this.title.setPosition(this.margin, this.margin);
 		let y = this.margin + 20;
-		let lineCount = 0;
+		// XP Prog
+		{
+			const labelText = this.scene.add.text(this.margin, y, 'XP Prog:', { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(0, 0);
+			const valueText = this.scene.add.text(this.width - this.margin, y, `${cur}/${need}`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(1, 0);
+			this.container.add(labelText);
+			this.container.add(valueText);
+			this.labels.push(labelText);
+			this.values.push(valueText);
+			y += this.lineH;
+			// small spacing before sections
+			y += Math.floor(this.lineH * 0.2);
+		}
+
 		for (let gi = 0; gi < groups.length; gi++) {
 			const group = groups[gi];
-			if (gi > 0) {
-				// Section header for each weapon block
-				const header = this.scene.add.text(this.margin, y, group.name, { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(0, 0);
-				this.container.add(header);
-				this.labels.push(header);
-				y += Math.floor(this.lineH * 0.8);
-				lineCount += 1;
-			}
+			// Section header for each group
+			const header = this.scene.add.text(this.margin, y, group.name, { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(0, 0);
+			this.container.add(header);
+			this.labels.push(header);
+			y += Math.floor(this.lineH * 0.8);
 			for (let i = 0; i < group.entries.length; i++) {
 				const [k, v] = group.entries[i];
 				const labelText = this.scene.add.text(this.margin, y, `${k}:`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(0, 0);
@@ -114,15 +122,14 @@ export class StatsPanel {
 				this.labels.push(labelText);
 				this.values.push(valueText);
 				y += this.lineH;
-				lineCount += 1;
 			}
-			// extra spacing after each group except last
 			if (gi < groups.length - 1) {
+				// spacing between sections
 				y += Math.floor(this.lineH * 0.4);
 			}
 		}
 
-		const height = this.margin * 2 + 20 + lineCount * this.lineH + Math.floor(this.lineH * 0.4) * (groups.length - 1);
+		const height = Math.ceil(y + this.margin);
 		this.bg.clear();
 		this.bg.fillStyle(0x151515, 0.7);
 		this.bg.fillRoundedRect(0, 0, this.width, height, 8);
