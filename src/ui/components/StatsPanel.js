@@ -17,6 +17,9 @@ export class StatsPanel {
 
     this.onStats = (stats) => this._draw(stats);
     EventBus.on('stats:update', this.onStats);
+    // Also refresh when XP progress changes so we can show current/needed
+    this.onXp = () => this._draw(playerState.getStats());
+    EventBus.on('xp:progress', this.onXp);
   }
 
   setPosition(x, y) {
@@ -35,6 +38,10 @@ export class StatsPanel {
       ['Pickup', stats.pickup?.toFixed?.(2) ?? String(stats.pickup)],
       ['XP', stats.xp?.toFixed?.(2) ?? String(stats.xp)],
     ];
+    // XP progress
+    const cur = playerState.getXpCurrent?.() ?? 0;
+    const need = playerState.getXpNeeded?.() ?? 0;
+    entries.push(['XP Prog', `${cur}/${need}`]);
     // Append derived radii
     if (this.scene && this.scene.scale) {
       const basePickup = window?.gameConfig?.xpPickup?.baseRadius || 60;
@@ -61,6 +68,7 @@ export class StatsPanel {
 
   destroy() {
     EventBus.off('stats:update', this.onStats);
+    EventBus.off('xp:progress', this.onXp);
     this.container?.destroy();
   }
 }
