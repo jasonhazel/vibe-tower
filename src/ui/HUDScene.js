@@ -5,7 +5,7 @@ import { ProgressBar } from './components/ProgressBar.js';
 import { SlotRow } from './components/SlotRow.js';
 import { hudTheme } from './theme.js';
 import { StatsPanel } from './components/StatsPanel.js';
-import { TomeCatalog } from '../perks/Tomes.js';
+import { TomeCatalog } from '../items/tomes/Tomes.js';
 import { Tooltip } from './components/Tooltip.js';
 
 export class HUDScene extends Phaser.Scene {
@@ -279,12 +279,11 @@ export class HUDScene extends Phaser.Scene {
       const y = slotsY;
       makeZone(x, y, () => this._lastWeaponIds?.[i] || null);
     }
-    // tome (aux) slots labels
-    const startX = innerX + innerW - (4 * size + 3 * gap);
+    // tome (aux) slots labels (right-aligned like SlotRow)
     for (let i = 0; i < 4; i++) {
-      const x = startX + i * (size + gap);
-      const y = slotsY;
-      makeZone(x, y, () => this._lastAuxIds?.[i] || null);
+      const sx = innerX + innerW - (i + 1) * size - i * gap;
+      const sy = slotsY;
+      makeZone(sx, sy, () => this._lastAuxIds?.[i] || null);
     }
   }
 }

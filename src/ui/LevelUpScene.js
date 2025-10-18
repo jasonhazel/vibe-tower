@@ -1,4 +1,4 @@
-import { TomeCatalog, tomeUpgradeOptions } from '../perks/Tomes.js';
+import { TomeCatalog, tomeUpgradeOptions } from '../items/tomes/Tomes.js';
 import { playerState } from '../state/PlayerState.js';
 
 export class LevelUpScene extends Phaser.Scene {

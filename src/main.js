@@ -1,16 +1,16 @@
 /* Minimal Phaser prototype with modular weapons */
 
-import { WeaponManager } from './weapons/WeaponManager.js';
-import { Aura } from './weapons/Aura.js';
-import { Fireball } from './weapons/Fireball.js';
-import { EnemyManager } from './enemies/EnemyManager.js';
+import { WeaponManager } from './items/weapons/WeaponManager.js';
+import { Aura } from './items/weapons/Aura.js';
+import { Fireball } from './items/weapons/Fireball.js';
+import { EnemyManager } from './entities/enemies/EnemyManager.js';
 import { HUDScene } from './ui/HUDScene.js';
 import { GameOverScene } from './ui/GameOverScene.js';
 import { LevelUpScene } from './ui/LevelUpScene.js';
 import { gameConfig } from './state/GameConfig.js';
 import { playerState } from './state/PlayerState.js';
 import { EventBus } from './state/EventBus.js';
-import { Player } from './player/Player.js';
+import { Player } from './entities/player/Player.js';
 import { PickupManager } from './pickups/PickupManager.js';
 import { PickupRadiusVisual } from './pickups/PickupRadiusVisual.js';
 
@@ -255,21 +255,34 @@ class PlayScene extends Phaser.Scene {
     this._chosenTomes = [];
     this._lastLevel = 1;
     this._levelUpOpen = false;
-    this.game.events.on('tome:selected', (id) => {
+
+    // Remove any stale handlers from previous scene instances
+    if (this._tomeHandlersAttached) {
+      this.game.events.off('tome:selected', this._onTomeSelected);
+      this.game.events.off('tome:upgraded', this._onTomeUpgraded);
+      this.game.events.off('tome:skipped', this._onTomeSkipped);
+    }
+
+    this._onTomeSelected = (id) => {
       this._chosenTomes.push(id);
       this._levelUpOpen = false;
       this.scene.resume();
       this.game.events.emit('tomes:update', this._chosenTomes);
-    });
-    this.game.events.on('tome:upgraded', (_id) => {
+    };
+    this._onTomeUpgraded = (_id) => {
       this._levelUpOpen = false;
       this.scene.resume();
       // no change to tome slots
-    });
-    this.game.events.on('tome:skipped', () => {
+    };
+    this._onTomeSkipped = () => {
       this._levelUpOpen = false;
       this.scene.resume();
-    });
+    };
+
+    this.game.events.on('tome:selected', this._onTomeSelected);
+    this.game.events.on('tome:upgraded', this._onTomeUpgraded);
+    this.game.events.on('tome:skipped', this._onTomeSkipped);
+    this._tomeHandlersAttached = true;
   }
 
   // Weapon logic moved to weapon classes
