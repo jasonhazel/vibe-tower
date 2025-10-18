@@ -90,9 +90,8 @@ export class PickupManager {
       duration,
       onComplete: () => {
         if (orb.active) orb.destroy();
-        // Show floating XP gain text (uses current multiplier for display)
-        const xpMul = playerState.getStats?.().xp || 1;
-        const granted = Math.max(1, Math.floor(amount * xpMul));
+        // Show floating XP gain text (uses PlayerState preview which respects overflow)
+        const granted = playerState.previewXpGrant ? playerState.previewXpGrant(amount) : amount;
         // Display above the player rather than the orb
         this._showXpText(playerX, playerY - 24, granted);
         playerState.addXp(amount);

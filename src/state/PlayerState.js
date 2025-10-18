@@ -64,13 +64,14 @@ class PlayerStateImpl {
     // base stats
     const base = { area: 1, damage: 1, projectiles: 1, attackSpeed: 1, xp: 1, pickup: 1 };
     const inc = { area: 0.2, damage: 0.2, projectiles: 1, attackSpeed: 0.2, xp: 0.2, pickup: 0.2 };
-    const multStep = 0.15; // each upgrade adds +0.15 to the total multiplier
+    const multStep = 0.15; // default upgrade step
     const next = { ...base };
     for (const key of Object.keys(this.tomes)) {
       const count = this.tomes[key] || 0;
       const upg = this.tomeUpgrades[key] || 0;
-      // Total multiplier = base + (#tomes * per-tome increment) + (upgrades * 0.15)
-      next[key] = base[key] + count * inc[key] + upg * multStep;
+      const step = (key === 'xp') ? 0.45 : multStep;
+      // Total multiplier = base + (#tomes * per-tome increment) + (upgrades * step)
+      next[key] = base[key] + count * inc[key] + upg * step;
     }
     this.stats = next;
     EventBus.emit('stats:update', this.getStats());
