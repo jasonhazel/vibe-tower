@@ -58,12 +58,16 @@ export class Fireball extends WeaponBase {
 
   _attemptShoot() {
     const { centerX, centerY } = this.context;
-    const enemy = this._findNearestEnemy(centerX, centerY, this._currentRange());
-    if (!enemy) return;
+    const candidates = this._collectEnemiesInRange(centerX, centerY, this._currentRange());
+    if (candidates.length === 0) return;
 
     const count = this._projectileCount();
-    for (let i = 0; i < count; i++) {
-      this._spawnProjectileTowards(centerX, centerY, enemy.x, enemy.y, (i - (count-1)/2) * 0.08);
+    const shots = Math.min(count, candidates.length);
+    const pool = candidates.slice();
+    for (let i = 0; i < shots; i++) {
+      const idx = Math.floor(Math.random() * pool.length);
+      const target = pool.splice(idx, 1)[0]; // sample without replacement
+      this._spawnProjectileTowards(centerX, centerY, target.x, target.y, 0);
     }
   }
 
@@ -78,17 +82,26 @@ export class Fireball extends WeaponBase {
   }
 
   _findNearestEnemy(x, y, maxRange) {
-    // Now returns a random enemy within range instead of the nearest
+    // kept for potential future use
     const r2 = maxRange * maxRange;
-    const candidates = [];
+    let best = null; let bestD2 = Infinity;
     this.context.enemiesGroup.children.iterate((e) => {
       if (!e) return;
       const dx = e.x - x; const dy = e.y - y; const d2 = dx*dx + dy*dy;
-      if (d2 <= r2) candidates.push(e);
+      if (d2 <= r2 && d2 < bestD2) { best = e; bestD2 = d2; }
     });
-    if (candidates.length === 0) return null;
-    const idx = Math.floor(Math.random() * candidates.length);
-    return candidates[idx];
+    return best;
+  }
+
+  _collectEnemiesInRange(x, y, maxRange) {
+    const r2 = maxRange * maxRange;
+    const out = [];
+    this.context.enemiesGroup.children.iterate((e) => {
+      if (!e) return;
+      const dx = e.x - x; const dy = e.y - y; const d2 = dx*dx + dy*dy;
+      if (d2 <= r2) out.push(e);
+    });
+    return out;
   }
 
   _currentCooldown() {
