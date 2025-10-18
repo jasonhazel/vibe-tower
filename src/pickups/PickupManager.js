@@ -1,10 +1,11 @@
 import { playerState } from '../state/PlayerState.js';
+import { gameConfig } from '../state/GameConfig.js';
 
 export class PickupManager {
   constructor(scene) {
     this.scene = scene;
     this.group = scene.add.group();
-    this.pickupRadius = 28; // px
+    this.pickupRadius = gameConfig.xpPickup.baseRadius;
   }
 
   spawnXpAt({ x, y }, amount = 1) {
@@ -31,7 +32,8 @@ export class PickupManager {
   }
 
   update(playerX, playerY) {
-    const pr = this.pickupRadius;
+    const override = playerState.getPickupRadius?.();
+    const pr = override != null ? override : this.pickupRadius;
     const prSq = pr * pr;
     const toCollect = [];
     this.group.children.iterate((orb) => {

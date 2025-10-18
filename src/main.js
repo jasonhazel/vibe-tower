@@ -45,6 +45,9 @@ class PlayScene extends Phaser.Scene {
       shield: gameConfig.player.baseShield,
     });
 
+    // Initialize pickup radius (can be overridden by perks later)
+    playerState.setPickupRadius?.(gameConfig.xpPickup.baseRadius);
+
     // HUD Scene overlay
     this.scene.launch('HUD');
 

@@ -10,6 +10,7 @@ class PlayerStateImpl {
     this.healthCurrent = 100;
     this.healthMax = 100;
     this.shield = 0;
+    this.pickupRadius = null; // null -> use gameConfig default
   }
 
   getXp() {
@@ -49,6 +50,16 @@ class PlayerStateImpl {
   heal(amount) {
     if (!amount || amount <= 0) return;
     this.setHealthCurrent(this.healthCurrent + Math.floor(amount));
+  }
+
+  // XP pickup radius API (modifiable via perks later)
+  setPickupRadius(radius) {
+    this.pickupRadius = Math.max(0, Math.floor(radius));
+    EventBus.emit('pickup:radius', this.getPickupRadius());
+  }
+
+  getPickupRadius() {
+    return this.pickupRadius;
   }
 }
 
