@@ -10,6 +10,8 @@ export class XpPickup extends PickupBase {
     scene.tweens.add({ targets: rect, y: y - 3, yoyo: true, repeat: 0, duration: 300, ease: 'sine.out' });
     rect.setData('type', 'xp');
     rect.setData('amount', amount);
+    // radius used for merging proximity checks
+    rect.setData('mergeR', 7);
     this.go = rect;
   }
 }

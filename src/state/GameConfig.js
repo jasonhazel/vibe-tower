@@ -1,7 +1,7 @@
 export const gameConfig = {
   width: window.innerWidth,
   height: window.innerHeight,
-  backgroundColor: '#101010',
+  backgroundColor: '#000000',
   spawnIntervalMs: 1000,
   spawn: {
     minRadius: 260,
@@ -9,7 +9,7 @@ export const gameConfig = {
   },
   aura: {
     tickIntervalMs: 250,
-    damagePerTick: 5,
+    damagePerTick: 1,
     radius: 80,
   },
   xpPickup: {
@@ -18,7 +18,7 @@ export const gameConfig = {
   },
   enemy: {
     baseSpeed: 40,
-    baseHp: 40,
+    baseHp: 1,
   },
   player: {
     baseHealth: 100,
