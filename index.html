@@ -2,14 +2,17 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Vibe Tower</title>
     <style>
       html, body, #app {
         margin: 0;
         padding: 0;
         width: 100vw;
-        height: 100vh;
+        /* Use dynamic viewport height to avoid mobile browser UI overlap */
+        height: 100vh;       /* fallback */
+        height: 100svh;      /* stable viewport units */
+        height: 100dvh;      /* dynamic viewport units */
         background: #111;
         color: #eee;
         overflow: hidden; /* prevent scrollbars */

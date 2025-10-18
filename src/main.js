@@ -369,8 +369,8 @@ class PlayScene extends Phaser.Scene {
 
 const config = {
   type: Phaser.AUTO,
-  width: window.innerWidth,
-  height: window.innerHeight,
+  width: document.documentElement.clientWidth,
+  height: document.documentElement.clientHeight,
   parent: 'app',
   backgroundColor: gameConfig.backgroundColor,
   scene: [PlayScene, HUDScene, GameOverScene, LevelUpScene],
@@ -384,12 +384,18 @@ const game = new Phaser.Game(config);
 
 // Ensure rotation updates the playfield size
 window.addEventListener('orientationchange', () => {
-  // slight delay allows browsers to recalc innerWidth/innerHeight
-  setTimeout(() => game.scale.resize(window.innerWidth, window.innerHeight), 100);
+  // give the browser time to settle safe UI and viewport units
+  setTimeout(() => {
+    const w = document.documentElement.clientWidth;
+    const h = document.documentElement.clientHeight;
+    game.scale.resize(w, h);
+  }, 150);
 });
 
 window.addEventListener('resize', () => {
-  game.scale.resize(window.innerWidth, window.innerHeight);
+  const w = document.documentElement.clientWidth;
+  const h = document.documentElement.clientHeight;
+  game.scale.resize(w, h);
 });
 
 
