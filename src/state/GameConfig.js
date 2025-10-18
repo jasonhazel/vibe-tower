@@ -10,15 +10,15 @@ export const gameConfig = {
   aura: {
     tickIntervalMs: 250,
     damagePerTick: 5,
-    radius: 100,
+    radius: 80,
   },
   xpPickup: {
     // Starting pickup radius for XP crystals; smaller than aura radius (100)
-    baseRadius: 75,
+    baseRadius: 70,
   },
   enemy: {
     baseSpeed: 40,
-    baseHp: 20,
+    baseHp: 5,
   },
   player: {
     baseHealth: 100,

@@ -43,8 +43,7 @@ class PlayScene extends Phaser.Scene {
 
     // Initialize player health first, then create the tower
     const maxHp = gameConfig.player.baseHealth;
-    const currentHp = Math.floor(maxHp * 0.5); // testing 50%
-    playerState.setHealth(maxHp, currentHp);
+    playerState.setHealth(maxHp, maxHp);
 
     this.tower = new Player(this, cx, cy, {
       radius: gameConfig.player.radius,
