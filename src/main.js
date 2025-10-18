@@ -256,7 +256,7 @@ const config = {
   height: window.innerHeight,
   parent: 'app',
   backgroundColor: gameConfig.backgroundColor,
-  scene: [PlayScene, HUDScene, GameOverScene],
+  scene: [PlayScene, HUDScene, GameOverScene, LevelUpScene],
   scale: {
     mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
