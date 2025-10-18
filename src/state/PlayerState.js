@@ -158,6 +158,16 @@ class PlayerStateImpl {
     if (leveled) EventBus.emit('player:level', this.level);
   }
 
+  // Debug/testing: force a single level-up without XP math
+  levelUpOnceDebug() {
+    this.level += 1;
+    this.xpCurrent = 0;
+    this.xpNeeded = Math.ceil(this.xpNeeded * 1.5);
+    EventBus.emit('xp:update', this.xpTotal);
+    EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
+    EventBus.emit('player:level', this.level);
+  }
+
   // Predict XP grant for a given amount using current multiplier and overflow
   previewXpGrant(amount) {
     const xpMul = this.stats?.xp ?? 1;
