@@ -159,7 +159,8 @@ export class Fireball extends WeaponBase {
     const { centerX, centerY } = this.context;
     this.rangeGfx.clear();
     this.rangeGfx.lineStyle(2, 0xff5252, 0.5);
-    const r = this._currentRange();
+    const rp = this.getRuntimeParams(playerState);
+    const r = rp.range;
     this.rangeGfx.strokeCircle(centerX, centerY, r);
   }
 }
