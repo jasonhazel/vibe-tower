@@ -29,6 +29,16 @@ export const WeaponCatalog = [
       ];
     },
   },
+  {
+    id: 'slam',
+    name: 'Slam',
+    getUpgradeOptions(ps) {
+      const s = ps?.getWeaponState?.()?.['slam'];
+      if (!s || s.level <= 0) return [];
+      const mk = (key, label) => ({ id: `wupg-slam-${key}`, name: `Slam ${label}`, isUpgrade: true, isWeapon: true, weaponId: 'slam', upgradeKey: key, apply: () => ps.upgradeWeaponById?.('slam', key) });
+      return [mk('damage', 'Damage+'), mk('cooldown', 'Faster Cooldown'), mk('radius', 'Max Radius+'), mk('growth', 'Faster Growth')];
+    },
+  },
 ];
 
 

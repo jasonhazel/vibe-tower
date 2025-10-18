@@ -19,6 +19,12 @@ export const gameConfig = {
     baseCooldownMs: 5000,
     radius: 4,
   },
+  slam: {
+    baseDamage: 14,
+    baseCooldownMs: 2200,
+    maxRadius: 180,
+    growthSpeed: 360, // px per second
+  },
   xpPickup: {
     // Starting pickup radius for XP crystals; smaller than aura radius (100)
     baseRadius: 70,

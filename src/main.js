@@ -3,6 +3,7 @@
 import { WeaponManager } from './items/weapons/WeaponManager.js';
 import { Aura } from './items/weapons/Aura.js';
 import { Fireball } from './items/weapons/Fireball.js';
+import { Slam } from './items/weapons/Slam.js';
 import { EnemyManager } from './entities/enemies/EnemyManager.js';
 import { HUDScene } from './ui/HUDScene.js';
 import { GameOverScene } from './ui/GameOverScene.js';
@@ -104,6 +105,15 @@ class PlayScene extends Phaser.Scene {
       });
       this.weaponManager.add(fireball);
     };
+    const addSlam = () => {
+      const slam = new Slam(this, this.weaponManager.context, {
+        baseCooldownMs: gameConfig.slam.baseCooldownMs,
+        baseDamage: gameConfig.slam.baseDamage,
+        maxRadius: gameConfig.slam.maxRadius,
+        growthSpeed: gameConfig.slam.growthSpeed,
+      });
+      this.weaponManager.add(slam);
+    };
     if (owned.length === 0) {
       // Default run: start with aura only and mark as owned
       playerState.addWeaponById('aura');
@@ -121,6 +131,9 @@ class PlayScene extends Phaser.Scene {
         // mark as owned and add instance
         playerState.addWeaponById('fireball');
         addFireball();
+      } else if (weaponId === 'slam') {
+        playerState.addWeaponById('slam');
+        addSlam();
       }
     });
 
