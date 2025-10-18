@@ -78,14 +78,17 @@ export class Fireball extends WeaponBase {
   }
 
   _findNearestEnemy(x, y, maxRange) {
+    // Now returns a random enemy within range instead of the nearest
     const r2 = maxRange * maxRange;
-    let best = null; let bestD2 = Infinity;
+    const candidates = [];
     this.context.enemiesGroup.children.iterate((e) => {
       if (!e) return;
       const dx = e.x - x; const dy = e.y - y; const d2 = dx*dx + dy*dy;
-      if (d2 <= r2 && d2 < bestD2) { best = e; bestD2 = d2; }
+      if (d2 <= r2) candidates.push(e);
     });
-    return best;
+    if (candidates.length === 0) return null;
+    const idx = Math.floor(Math.random() * candidates.length);
+    return candidates[idx];
   }
 
   _currentCooldown() {

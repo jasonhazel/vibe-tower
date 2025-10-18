@@ -16,7 +16,7 @@ export const gameConfig = {
     baseDamage: 15,
     projectileSpeed: 260,
     range: 320, // base targeting range
-    baseCooldownMs: 1000,
+    baseCooldownMs: 5000,
     radius: 4,
   },
   xpPickup: {
