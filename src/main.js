@@ -115,6 +115,10 @@ class PlayScene extends Phaser.Scene {
       const newPickupR = Math.floor(gameConfig.xpPickup.baseRadius * pickupMul);
       playerState.setPickupRadius?.(newPickupR);
       this.pickupRadiusVisual?.setRadius?.(newPickupR);
+      // update fireball range ring visuals
+      if (this.weaponManager?.weapons) {
+        this.weaponManager.weapons.forEach(w => w._redrawRange?.());
+      }
     });
 
     // Resize handling: keep player centered without changing relative positions
@@ -147,6 +151,10 @@ class PlayScene extends Phaser.Scene {
       this.weaponManager.context.centerY = this.centerY;
       this._auraRef?.setCenter(this.centerX, this.centerY);
       this.pickupRadiusVisual?.setCenter(this.centerX, this.centerY);
+      // update any weapons that support center updates (e.g., Fireball range ring)
+      if (this.weaponManager?.weapons) {
+        this.weaponManager.weapons.forEach(w => w.setCenter?.(this.centerX, this.centerY));
+      }
     });
 
     // Restart handler

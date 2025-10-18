@@ -13,6 +13,10 @@ export class Fireball extends WeaponBase {
     this.radius = config.radius ?? gameConfig.fireball.radius;
     this.timer = 0;
     this.projectiles = scene.add.group();
+    // range visual
+    this.rangeGfx = scene.add.graphics();
+    this.rangeGfx.lineStyle(2, 0xff5252, 0.6);
+    this._redrawRange();
   }
 
   getId() { return this.id; }
@@ -124,6 +128,20 @@ export class Fireball extends WeaponBase {
 
   destroy() {
     this.projectiles.clear(true, true);
+    this.rangeGfx?.destroy();
+  }
+
+  setCenter(x, y) {
+    this.context.centerX = x; this.context.centerY = y;
+    this._redrawRange();
+  }
+
+  _redrawRange() {
+    const { centerX, centerY } = this.context;
+    this.rangeGfx.clear();
+    this.rangeGfx.lineStyle(2, 0xff5252, 0.5);
+    const r = this._currentRange();
+    this.rangeGfx.strokeCircle(centerX, centerY, r);
   }
 }
 
