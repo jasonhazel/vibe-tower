@@ -1,10 +1,10 @@
-import { TomeArea } from './tomes/TomeArea.js';
-import { TomeDamage } from './tomes/TomeDamage.js';
-import { TomeProjectiles } from './tomes/TomeProjectiles.js';
-import { TomeAttackSpeed } from './tomes/TomeAttackSpeed.js';
-import { TomeXP } from './tomes/TomeXP.js';
-import { TomePickup } from './tomes/TomePickup.js';
-import { playerState } from '../state/PlayerState.js';
+import { TomeArea } from './TomeArea.js';
+import { TomeDamage } from './TomeDamage.js';
+import { TomeProjectiles } from './TomeProjectiles.js';
+import { TomeAttackSpeed } from './TomeAttackSpeed.js';
+import { TomeXP } from './TomeXP.js';
+import { TomePickup } from './TomePickup.js';
+import { playerState } from '../../state/PlayerState.js';
 
 export const TomeCatalog = [
   new TomeArea(),
