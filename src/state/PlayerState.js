@@ -86,8 +86,8 @@ class PlayerStateImpl {
     while (this.xpCurrent >= this.xpNeeded) {
       this.xpCurrent -= this.xpNeeded;
       this.level += 1;
-      // increase requirement by 12% each level (ceil to integer)
-      this.xpNeeded = Math.ceil(this.xpNeeded * 1.12);
+      // increase requirement by 1.5x each level (ceil to integer)
+      this.xpNeeded = Math.ceil(this.xpNeeded * 1.5);
       leveled = true;
     }
     EventBus.emit('xp:update', this.xpTotal);

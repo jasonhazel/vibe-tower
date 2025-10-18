@@ -54,7 +54,7 @@ export class StatsPanel {
     this.title.setPosition(this.margin, this.margin);
     for (let i = 0; i < entries.length; i++) {
       const [k, v] = entries[i];
-      const t = this.scene.add.text(this.margin, this.margin + 20 + i * this.lineH, `${k}: ${v}x`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' });
+      const t = this.scene.add.text(this.margin, this.margin + 20 + i * this.lineH, `${k}: ${v}`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' });
       this.container.add(t);
       this.labels.push(t);
     }
