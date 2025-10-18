@@ -13,7 +13,7 @@ export const gameConfig = {
     radius: 80,
   },
   fireball: {
-    baseDamage: 15,
+    baseDamage: 10,
     projectileSpeed: 260,
     range: 160, // base targeting range
     baseCooldownMs: 5000,
