@@ -4,6 +4,7 @@ import { WeaponManager } from './weapons/WeaponManager.js';
 import { Aura } from './weapons/Aura.js';
 import { EnemyManager } from './enemies/EnemyManager.js';
 import { HUDScene } from './ui/HUDScene.js';
+import { GameOverScene } from './ui/GameOverScene.js';
 import { gameConfig } from './state/GameConfig.js';
 import { playerState } from './state/PlayerState.js';
 import { Player } from './player/Player.js';
@@ -117,6 +118,12 @@ class PlayScene extends Phaser.Scene {
       this._auraRef?.setCenter(this.centerX, this.centerY);
       this.pickupRadiusVisual?.setCenter(this.centerX, this.centerY);
     });
+
+    // Restart handler
+    this.game.events.on('game:restart', () => {
+      this.scene.restart();
+      this.scene.stop('GameOver');
+    });
   }
 
   update(time, delta) {
@@ -168,6 +175,13 @@ class PlayScene extends Phaser.Scene {
         enemy.destroy();
       }
     }
+
+    // Check game over
+    if (playerState.getHealthCurrent() <= 0 && !this._gameOverShown) {
+      this._gameOverShown = true;
+      this.scene.pause();
+      this.scene.launch('GameOver', { runMs: this.runMs, xpTotal: playerState.getXp(), level: playerState.getLevel?.() ?? 1 });
+    }
   }
 
   // Removed grid helper
@@ -206,7 +220,7 @@ const config = {
   height: window.innerHeight,
   parent: 'app',
   backgroundColor: gameConfig.backgroundColor,
-  scene: [PlayScene, HUDScene],
+  scene: [PlayScene, HUDScene, GameOverScene],
   scale: {
     mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
