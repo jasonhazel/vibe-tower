@@ -27,6 +27,8 @@ class PlayerStateImpl {
     };
     // Tome state: { [tomeId]: { level: number, upgrades: number, key: string } }
     this.tomeState = {};
+    // Weapon state: { [weaponId]: { level: number, upgrades: { [k:string]: number } } }
+    this.weaponState = {};
   }
 
   getXp() { return this.xpTotal; }
@@ -79,6 +81,29 @@ class PlayerStateImpl {
 
   getTomeState() {
     return JSON.parse(JSON.stringify(this.tomeState));
+  }
+
+  // Weapon system
+  getWeaponState() {
+    return JSON.parse(JSON.stringify(this.weaponState));
+  }
+
+  addWeaponById(weaponId) {
+    if (!weaponId) return;
+    if (!this.weaponState[weaponId]) {
+      this.weaponState[weaponId] = { level: 0, upgrades: {} };
+    }
+    this.weaponState[weaponId].level += 1;
+    // Weapons typically influence via runtime params; recompute to be safe
+    EventBus.emit('stats:update', this.getStats());
+  }
+
+  upgradeWeaponById(weaponId, upgKey) {
+    if (!weaponId || !upgKey) return;
+    const s = this.weaponState[weaponId];
+    if (!s || s.level <= 0) return;
+    s.upgrades[upgKey] = (s.upgrades[upgKey] || 0) + 1;
+    EventBus.emit('stats:update', this.getStats());
   }
 
   _recomputeStatsFromTomes() {

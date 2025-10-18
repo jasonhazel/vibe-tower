@@ -1,4 +1,5 @@
 import { TomeCatalog, tomeUpgradeOptions } from '../items/tomes/Tomes.js';
+import { WeaponCatalog } from '../items/weapons/WeaponCatalog.js';
 import { playerState } from '../state/PlayerState.js';
 
 export class LevelUpScene extends Phaser.Scene {
@@ -27,7 +28,15 @@ export class LevelUpScene extends Phaser.Scene {
     const availableTomes = TomeCatalog.filter((t) => !chosenIds.includes(t.id));
     const tomeOpts = (chosenIds.length < maxTomes) ? availableTomes : [];
     const upgOpts = tomeUpgradeOptions(chosenIds);
-    const pool = [...tomeOpts, ...upgOpts];
+
+    // Weapons: new unlocks (if not owned) and upgrades for owned
+    const ws = playerState.getWeaponState();
+    const ownedWeaponIds = Object.keys(ws || {}).filter(id => ws[id]?.level > 0);
+    const unownedWeapons = WeaponCatalog.filter(w => !ownedWeaponIds.includes(w.id));
+    const weaponUnlocks = unownedWeapons.map(w => ({ id: `w-${w.id}`, name: w.name, isWeapon: true, weaponId: w.id, apply: () => playerState.addWeaponById(w.id) }));
+    const weaponUpgrades = WeaponCatalog.flatMap(w => w.getUpgradeOptions?.(playerState) || []);
+
+    const pool = [...tomeOpts, ...upgOpts, ...weaponUnlocks, ...weaponUpgrades];
     const items = pool.sort(() => Math.random() - 0.5).slice(0, 3);
     const colW = 150;
     const startX = w / 2 - (items.length * colW + (items.length - 1) * 16) / 2;

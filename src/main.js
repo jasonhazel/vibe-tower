@@ -82,23 +82,38 @@ class PlayScene extends Phaser.Scene {
       awardXp: (amount) => { playerState.addXp(amount); }, // kept for future use
       spawnXp: (pos, amount) => { this.pickups.spawnXpAt(pos, amount); },
     });
-    const aura = new Aura(this, this.weaponManager.context, {
+    // Seed starting weapons if owned in state
+    const ws = playerState.getWeaponState();
+    const owned = Object.keys(ws || {}).filter(id => ws[id]?.level > 0);
+    const addAura = () => {
+      const aura = new Aura(this, this.weaponManager.context, {
         tickIntervalMs: gameConfig.aura.tickIntervalMs,
         damagePerTick: gameConfig.aura.damagePerTick,
         radius: gameConfig.aura.radius,
       });
-    this.weaponManager.add(aura);
-    this._auraRef = aura;
-
-    // Add fireball by default as a starting weapon
-    const fireball = new Fireball(this, this.weaponManager.context, {
-      baseCooldownMs: gameConfig.fireball.baseCooldownMs,
-      projectileSpeed: gameConfig.fireball.projectileSpeed,
-      range: gameConfig.fireball.range,
-      baseDamage: gameConfig.fireball.baseDamage,
-      radius: gameConfig.fireball.radius,
-    });
-    this.weaponManager.add(fireball);
+      this.weaponManager.add(aura);
+      this._auraRef = aura;
+    };
+    const addFireball = () => {
+      const fireball = new Fireball(this, this.weaponManager.context, {
+        baseCooldownMs: gameConfig.fireball.baseCooldownMs,
+        projectileSpeed: gameConfig.fireball.projectileSpeed,
+        range: gameConfig.fireball.range,
+        baseDamage: gameConfig.fireball.baseDamage,
+        radius: gameConfig.fireball.radius,
+      });
+      this.weaponManager.add(fireball);
+    };
+    if (owned.length === 0) {
+      // Default run: start with aura + fireball and mark as owned
+      playerState.addWeaponById('aura');
+      playerState.addWeaponById('fireball');
+      addAura();
+      addFireball();
+    } else {
+      if (owned.includes('aura')) addAura();
+      if (owned.includes('fireball')) addFireball();
+    }
 
     // Ensure HUD has the initial weapon list even if it mounted later
     this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());

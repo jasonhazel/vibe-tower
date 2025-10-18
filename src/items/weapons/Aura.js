@@ -20,6 +20,31 @@ export class Aura extends WeaponBase {
     return this.id;
   }
 
+  getUpgradeOptions(ps) {
+    const ws = ps?.getWeaponState?.()?.[this.id];
+    if (!ws || ws.level <= 0) return [];
+    const mk = (key, label) => ({ id: `wupg-${this.id}-${key}`, name: `${this.constructor.name} ${label}` , isUpgrade: true, apply: () => ps.upgradeWeaponById?.(this.id, key), getSlotIconDrawer: () => this.getSlotIconDrawer?.() });
+    return [
+      mk('damage', 'Damage+'),
+      mk('radius', 'Radius+'),
+      mk('tick', 'Tick Faster'),
+    ];
+  }
+
+  getRuntimeParams(ps) {
+    const stats = ps?.getStats?.() || { area: 1, damage: 1 };
+    const ws = ps?.getWeaponState?.()?.[this.id] || { upgrades: {} };
+    const up = ws.upgrades || {};
+    const dmgMult = (stats.damage || 1) * (1 + 0.15 * (up.damage || 0));
+    const radiusMult = (stats.area || 1) * (1 + 0.10 * (up.radius || 0));
+    const tickMult = Math.pow(0.9, (up.tick || 0)); // 10% faster per upgrade
+    return {
+      damagePerTick: Math.max(1, Math.floor(this.damagePerTick * dmgMult)),
+      radius: Math.max(1, Math.floor(this.radius * radiusMult)),
+      tickIntervalMs: Math.max(60, Math.floor(this.tickIntervalMs * tickMult)),
+    };
+  }
+
   getSlotIconDrawer() {
     return (gfx, x, y, size) => {
       const r = Math.floor(size * 0.28);
@@ -29,16 +54,18 @@ export class Aura extends WeaponBase {
   }
 
   update(deltaMs) {
+    const rp = this.getRuntimeParams(playerState);
     this.timer += deltaMs;
-    if (this.timer >= this.tickIntervalMs) {
+    if (this.timer >= rp.tickIntervalMs) {
       this.timer = 0;
-      this.applyDamage();
+      this.applyDamage(rp);
     }
   }
 
-  applyDamage() {
+  applyDamage(runtime) {
     const { enemiesGroup, centerX, centerY, awardXp, spawnXp } = this.context;
-    const radiusSq = this.radius * this.radius;
+    const r = runtime?.radius ?? this.radius;
+    const radiusSq = r * r;
     const toRemove = [];
     enemiesGroup.children.iterate((enemy) => {
       if (!enemy) return;
@@ -46,9 +73,7 @@ export class Aura extends WeaponBase {
       const dy = enemy.y - centerY;
       const distSq = dx * dx + dy * dy;
       if (distSq <= radiusSq) {
-        // Apply player damage multiplier
-        const dmgMult = (playerState.getStats?.().damage ?? 1);
-        const dmg = Math.max(0, Math.floor(this.damagePerTick * dmgMult));
+        const dmg = runtime?.damagePerTick ?? this.damagePerTick;
         const hp = enemy.getData('hp') - (dmg || this.damagePerTick);
         enemy.setData('hp', hp);
         if (hp <= 0) toRemove.push(enemy);

@@ -19,6 +19,33 @@ export class Fireball extends WeaponBase {
     this._redrawRange();
   }
 
+  getUpgradeOptions(ps) {
+    const ws = ps?.getWeaponState?.()?.[this.id];
+    if (!ws || ws.level <= 0) return [];
+    const mk = (key, label) => ({ id: `wupg-${this.id}-${key}`, name: `${this.constructor.name} ${label}`, isUpgrade: true, apply: () => ps.upgradeWeaponById?.(this.id, key), getSlotIconDrawer: () => this.getSlotIconDrawer?.() });
+    return [
+      mk('damage', 'Damage+'),
+      mk('cooldown', 'Faster Cast'),
+      mk('range', 'Range+'),
+      mk('speed', 'Projectile Speed+'),
+      mk('radius', 'Explosion Radius+'),
+      mk('projectiles', 'More Projectiles'),
+    ];
+  }
+
+  getRuntimeParams(ps) {
+    const stats = ps?.getStats?.() || { area: 1, damage: 1, projectiles: 1, attackSpeed: 1 };
+    const ws = ps?.getWeaponState?.()?.[this.id] || { upgrades: {} };
+    const up = ws.upgrades || {};
+    const dmg = Math.max(1, Math.floor(this.baseDamage * (stats.damage || 1) * (1 + 0.15 * (up.damage || 0))));
+    const cd = Math.max(120, Math.floor((this.cooldownMs * Math.pow(0.9, (up.cooldown || 0))) / Math.max(0.1, stats.attackSpeed || 1)));
+    const range = Math.floor(this.range * (stats.area || 1) * (1 + 0.10 * (up.range || 0)));
+    const speed = this.projectileSpeed * (1 + 0.10 * (up.speed || 0));
+    const rad = Math.floor(this.radius * (1 + 0.10 * (up.radius || 0)));
+    const proj = Math.max(1, Math.floor((stats.projectiles || 1) + (up.projectiles || 0)));
+    return { damage: dmg, cooldownMs: cd, range, projectileSpeed: speed, radius: rad, projectiles: proj };
+  }
+
   getId() { return this.id; }
 
   getSlotIconDrawer() {
@@ -30,6 +57,7 @@ export class Fireball extends WeaponBase {
   }
 
   update(deltaMs) {
+    const rp = this.getRuntimeParams(playerState);
     this.timer += deltaMs;
     // Move active projectiles
     this.projectiles.children.iterate((p) => {
@@ -44,11 +72,10 @@ export class Fireball extends WeaponBase {
       enemies.children.iterate((e) => {
         if (hit || !e) return;
         const dx = e.x - p.x; const dy = e.y - p.y;
-        if ((dx*dx + dy*dy) <= (this.radius + (e.getData('radius')||10))**2) hit = e;
+        if ((dx*dx + dy*dy) <= (rp.radius + (e.getData('radius')||10))**2) hit = e;
       });
       if (hit) {
-        const dmgMult = playerState.getStats?.().damage ?? 1;
-        const dmg = Math.max(1, Math.floor(this.baseDamage * dmgMult));
+        const dmg = rp.damage;
         const hp = hit.getData('hp') - dmg;
         hit.setData('hp', hp);
         if (hp <= 0) {
@@ -62,7 +89,7 @@ export class Fireball extends WeaponBase {
       }
     });
 
-    if (this.timer >= this._currentCooldown()) {
+    if (this.timer >= rp.cooldownMs) {
       this.timer = 0;
       this._attemptShoot();
     }
@@ -70,25 +97,26 @@ export class Fireball extends WeaponBase {
 
   _attemptShoot() {
     const { centerX, centerY } = this.context;
-    const candidates = this._collectEnemiesInRange(centerX, centerY, this._currentRange());
+    const rp = this.getRuntimeParams(playerState);
+    const candidates = this._collectEnemiesInRange(centerX, centerY, rp.range);
     if (candidates.length === 0) return;
 
-    const count = this._projectileCount();
+    const count = rp.projectiles;
     const shots = Math.min(count, candidates.length);
     const pool = candidates.slice();
     for (let i = 0; i < shots; i++) {
       const idx = Math.floor(Math.random() * pool.length);
       const target = pool.splice(idx, 1)[0]; // sample without replacement
-      this._spawnProjectileTowards(centerX, centerY, target.x, target.y, 0);
+      this._spawnProjectileTowards(centerX, centerY, target.x, target.y, 0, rp);
     }
   }
 
-  _spawnProjectileTowards(px, py, tx, ty, angleOffset = 0) {
+  _spawnProjectileTowards(px, py, tx, ty, angleOffset = 0, rp) {
     const angle = Math.atan2(ty - py, tx - px) + angleOffset;
-    const vx = Math.cos(angle) * this.projectileSpeed;
-    const vy = Math.sin(angle) * this.projectileSpeed;
-    const life = (this._currentRange() / this.projectileSpeed) * 1000;
-    const g = this.scene.add.circle(px, py, this.radius, 0xff7043);
+    const vx = Math.cos(angle) * rp.projectileSpeed;
+    const vy = Math.sin(angle) * rp.projectileSpeed;
+    const life = (rp.range / rp.projectileSpeed) * 1000;
+    const g = this.scene.add.circle(px, py, rp.radius, 0xff7043);
     g.vx = vx; g.vy = vy; g.life = life;
     this.projectiles.add(g);
   }
@@ -116,23 +144,6 @@ export class Fireball extends WeaponBase {
     return out;
   }
 
-  _currentCooldown() {
-    const atk = playerState.getStats?.().attackSpeed ?? 1; // higher = faster
-    const base = this.cooldownMs;
-    // scale inversely: cooldown / atk
-    return Math.max(120, Math.floor(base / Math.max(0.1, atk)));
-  }
-
-  _currentRange() {
-    const area = playerState.getStats?.().area ?? 1;
-    return Math.floor(this.range * area);
-  }
-
-  _projectileCount() {
-    // projectiles stat should be integer-based
-    const proj = Math.max(1, Math.floor(playerState.getStats?.().projectiles ?? 1));
-    return proj;
-  }
 
   destroy() {
     this.projectiles.clear(true, true);
