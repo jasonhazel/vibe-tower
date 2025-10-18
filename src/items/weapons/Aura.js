@@ -102,6 +102,7 @@ export class Aura extends WeaponBase {
   }
 
   setRadius(newRadius) {
+    // Keep base radius; visual reflects runtime-scaled radius, not this raw value
     this.radius = Math.max(0, Math.floor(newRadius));
     this._redrawRange();
   }

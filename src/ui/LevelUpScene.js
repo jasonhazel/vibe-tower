@@ -42,7 +42,8 @@ export class LevelUpScene extends Phaser.Scene {
     const pushWeighted = (arr, weight) => arr.forEach(it => weighted.push({ item: it, weight }));
     pushWeighted(tomeOpts, tomeSlotsAvailable ? 3 : 1);
     pushWeighted(upgOpts, 1);
-    pushWeighted(weaponUnlocks, 1);
+    // Weapons weighted even higher than tomes when unlocking; upgrades normal
+    pushWeighted(weaponUnlocks, tomeSlotsAvailable ? 4 : 2);
     pushWeighted(weaponUpgrades, 1);
 
     // Sample up to 3 items without replacement using weights

@@ -105,11 +105,9 @@ class PlayScene extends Phaser.Scene {
       this.weaponManager.add(fireball);
     };
     if (owned.length === 0) {
-      // Default run: start with aura + fireball and mark as owned
+      // Default run: start with aura only and mark as owned
       playerState.addWeaponById('aura');
-      playerState.addWeaponById('fireball');
       addAura();
-      addFireball();
     } else {
       if (owned.includes('aura')) addAura();
       if (owned.includes('fireball')) addFireball();
@@ -124,8 +122,7 @@ class PlayScene extends Phaser.Scene {
     // React to stat changes to scale aura and pickup radius
     EventBus.on('stats:update', (stats) => {
       const areaMul = stats?.area || 1;
-      const newAuraR = Math.floor(gameConfig.aura.radius * areaMul);
-      this._auraRef?.setRadius(newAuraR);
+      // Aura radius now scales via runtime params; just redraw the visual
       this._auraRef?._redrawRange?.();
       const pickupMul = (stats?.pickup || 1);
       const newPickupR = Math.floor(gameConfig.xpPickup.baseRadius * pickupMul * areaMul);
