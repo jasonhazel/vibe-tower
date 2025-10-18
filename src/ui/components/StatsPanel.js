@@ -8,6 +8,7 @@ export class StatsPanel {
     this.bg = scene.add.graphics();
     this.container.add(this.bg);
     this.labels = [];
+    this.values = [];
     this.margin = 10;
     this.width = 180;
     this.lineH = 18;
@@ -20,6 +21,9 @@ export class StatsPanel {
     // Also refresh when XP progress changes so we can show current/needed
     this.onXp = () => this._draw(playerState.getStats());
     EventBus.on('xp:progress', this.onXp);
+    // Refresh when weapons list changes
+    this.onWeapons = () => this._draw(playerState.getStats());
+    this.scene.game?.events?.on('weapons:update', this.onWeapons);
   }
 
   setPosition(x, y) {
@@ -27,9 +31,11 @@ export class StatsPanel {
   }
 
   _draw(stats) {
-    // clear previous labels
+    // clear previous labels/values
     this.labels.forEach((t) => t.destroy());
+    this.values.forEach((t) => t.destroy());
     this.labels.length = 0;
+    this.values.length = 0;
     const entries = [
       ['Area', stats.area?.toFixed?.(2) ?? String(stats.area)],
       ['Damage', stats.damage?.toFixed?.(2) ?? String(stats.damage)],
@@ -51,12 +57,38 @@ export class StatsPanel {
       entries.push(['Pickup R', String(pickupR)]);
       entries.push(['Aura R', String(auraR)]);
     }
+    // Append per-weapon runtime stats from PlayScene
+    try {
+      const play = this.scene.scene.get('PlayScene');
+      const weapons = play?.weaponManager?.weapons || [];
+      for (const w of weapons) {
+        const id = w?.getId?.() || 'weapon';
+        const rp = w?.getRuntimeParams?.(playerState) || {};
+        if (id === 'aura') {
+          entries.push(['Aura tick', `${rp.tickIntervalMs ?? w.tickIntervalMs}ms`]);
+          entries.push(['Aura dmg', `${rp.damagePerTick ?? w.damagePerTick}`]);
+          entries.push(['Aura rad', `${rp.radius ?? w.radius}`]);
+        } else if (id === 'fireball') {
+          entries.push(['Fire cd', `${rp.cooldownMs ?? w.cooldownMs}ms`]);
+          entries.push(['Fire dmg', `${rp.damage ?? w.baseDamage}`]);
+          entries.push(['Fire proj', `${rp.projectiles ?? 1}`]);
+          entries.push(['Fire rng', `${rp.range ?? w.range}`]);
+          entries.push(['Fire spd', `${Math.round(rp.projectileSpeed ?? w.projectileSpeed)}`]);
+          entries.push(['Fire rad', `${rp.radius ?? w.radius}`]);
+        }
+      }
+    } catch (_) {}
+
     this.title.setPosition(this.margin, this.margin);
     for (let i = 0; i < entries.length; i++) {
       const [k, v] = entries[i];
-      const t = this.scene.add.text(this.margin, this.margin + 20 + i * this.lineH, `${k}: ${v}`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' });
-      this.container.add(t);
-      this.labels.push(t);
+      const y = this.margin + 20 + i * this.lineH;
+      const labelText = this.scene.add.text(this.margin, y, `${k}:`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(0, 0);
+      const valueText = this.scene.add.text(this.width - this.margin, y, `${v}`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(1, 0);
+      this.container.add(labelText);
+      this.container.add(valueText);
+      this.labels.push(labelText);
+      this.values.push(valueText);
     }
     const height = this.margin * 2 + 20 + entries.length * this.lineH;
     this.bg.clear();
@@ -69,6 +101,7 @@ export class StatsPanel {
   destroy() {
     EventBus.off('stats:update', this.onStats);
     EventBus.off('xp:progress', this.onXp);
+    this.scene.game?.events?.off('weapons:update', this.onWeapons);
     this.container?.destroy();
   }
 }
