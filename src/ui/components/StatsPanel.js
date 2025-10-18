@@ -58,8 +58,8 @@ export class StatsPanel {
 			playerEntries.push(['Aura R', String(auraR)]);
 		}
 
-		// Weapon blocks from PlayScene
-		const groups = [playerEntries];
+		// Groups: player first, then weapons with headers (no harsh lines)
+		const groups = [{ name: 'Player', entries: playerEntries }];
 		try {
 			const play = this.scene.scene.get('PlayScene');
 			const weapons = play?.weaponManager?.weapons || [];
@@ -67,20 +67,26 @@ export class StatsPanel {
 				const id = w?.getId?.() || 'weapon';
 				const rp = w?.getRuntimeParams?.(playerState) || {};
 				if (id === 'aura') {
-					groups.push([
-						['Aura tick', `${rp.tickIntervalMs ?? w.tickIntervalMs}ms`],
-						['Aura dmg', `${rp.damagePerTick ?? w.damagePerTick}`],
-						['Aura rad', `${rp.radius ?? w.radius}`],
-					]);
+					groups.push({
+						name: 'Aura',
+						entries: [
+							['Aura tick', `${rp.tickIntervalMs ?? w.tickIntervalMs}ms`],
+							['Aura dmg', `${rp.damagePerTick ?? w.damagePerTick}`],
+							['Aura rad', `${rp.radius ?? w.radius}`],
+						],
+					});
 				} else if (id === 'fireball') {
-					groups.push([
-						['Fire cd', `${rp.cooldownMs ?? w.cooldownMs}ms`],
-						['Fire dmg', `${rp.damage ?? w.baseDamage}`],
-						['Fire proj', `${rp.projectiles ?? 1}`],
-						['Fire rng', `${rp.range ?? w.range}`],
-						['Fire spd', `${Math.round(rp.projectileSpeed ?? w.projectileSpeed)}`],
-						['Fire rad', `${rp.radius ?? w.radius}`],
-					]);
+					groups.push({
+						name: 'Fireball',
+						entries: [
+							['Fire cd', `${rp.cooldownMs ?? w.cooldownMs}ms`],
+							['Fire dmg', `${rp.damage ?? w.baseDamage}`],
+							['Fire proj', `${rp.projectiles ?? 1}`],
+							['Fire rng', `${rp.range ?? w.range}`],
+							['Fire spd', `${Math.round(rp.projectileSpeed ?? w.projectileSpeed)}`],
+							['Fire rad', `${rp.radius ?? w.radius}`],
+						],
+					});
 				}
 			}
 		} catch (_) {}
@@ -88,12 +94,19 @@ export class StatsPanel {
 		// Render
 		this.title.setPosition(this.margin, this.margin);
 		let y = this.margin + 20;
-		const dividerYs = [];
 		let lineCount = 0;
 		for (let gi = 0; gi < groups.length; gi++) {
 			const group = groups[gi];
-			for (let i = 0; i < group.length; i++) {
-				const [k, v] = group[i];
+			if (gi > 0) {
+				// Section header for each weapon block
+				const header = this.scene.add.text(this.margin, y, group.name, { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(0, 0);
+				this.container.add(header);
+				this.labels.push(header);
+				y += Math.floor(this.lineH * 0.8);
+				lineCount += 1;
+			}
+			for (let i = 0; i < group.entries.length; i++) {
+				const [k, v] = group.entries[i];
 				const labelText = this.scene.add.text(this.margin, y, `${k}:`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(0, 0);
 				const valueText = this.scene.add.text(this.width - this.margin, y, `${v}`, { fontFamily: 'monospace', fontSize: '12px', color: '#e0e0e0' }).setOrigin(1, 0);
 				this.container.add(labelText);
@@ -103,26 +116,18 @@ export class StatsPanel {
 				y += this.lineH;
 				lineCount += 1;
 			}
+			// extra spacing after each group except last
 			if (gi < groups.length - 1) {
-				dividerYs.push(y - this.lineH / 2);
+				y += Math.floor(this.lineH * 0.4);
 			}
 		}
 
-		const height = this.margin * 2 + 20 + lineCount * this.lineH;
+		const height = this.margin * 2 + 20 + lineCount * this.lineH + Math.floor(this.lineH * 0.4) * (groups.length - 1);
 		this.bg.clear();
 		this.bg.fillStyle(0x151515, 0.7);
 		this.bg.fillRoundedRect(0, 0, this.width, height, 8);
 		this.bg.lineStyle(1, 0x444444, 1);
 		this.bg.strokeRoundedRect(0, 0, this.width, height, 8);
-		if (dividerYs.length) {
-			this.bg.lineStyle(1, 0x444444, 0.6);
-			dividerYs.forEach((dy) => {
-				this.bg.beginPath();
-				this.bg.moveTo(this.margin, dy);
-				this.bg.lineTo(this.width - this.margin, dy);
-				this.bg.strokePath();
-			});
-		}
 	}
 
 	destroy() {
