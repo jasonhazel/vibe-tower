@@ -1,0 +1,21 @@
+
+# Node
+node_modules/
+.npm-cache/
+
+# Vite
+dist/
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Cursor/Agent
+.cursor/
+.agent/
+.agent-tools/

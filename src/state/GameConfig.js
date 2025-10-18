@@ -1,0 +1,28 @@
+export const gameConfig = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+  backgroundColor: '#101010',
+  spawnIntervalMs: 1000,
+  spawn: {
+    minRadius: 260,
+    maxRadius: 380,
+  },
+  aura: {
+    tickIntervalMs: 250,
+    damagePerTick: 5,
+    radius: 100,
+  },
+  enemy: {
+    baseSpeed: 40,
+    baseHp: 20,
+  },
+  player: {
+    baseHealth: 100,
+    baseShield: 0,
+    contactTickMs: 300,
+    contactDamagePerEnemy: 5,
+    radius: 16,
+  },
+};
+
+
