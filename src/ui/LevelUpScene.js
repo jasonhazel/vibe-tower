@@ -97,6 +97,8 @@ export class LevelUpScene extends Phaser.Scene {
           if (!t.isUpgrade && t.weaponId) {
             // unlock: ask PlayScene to instantiate and equip
             this.game.events.emit('weapon:add', t.weaponId);
+          } else if (t.isUpgrade && t.weaponId) {
+            this.game.events.emit('weapon:upgraded', { weaponId: t.weaponId, key: t.upgradeKey });
           }
           // weapon upgrades don't change tome slots
         } else {

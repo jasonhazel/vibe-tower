@@ -135,6 +135,15 @@ class PlayScene extends Phaser.Scene {
         playerState.addWeaponById('slam');
         addSlam();
       }
+      // close level-up state if open
+      this._levelUpOpen = false;
+      this.scene.resume();
+    });
+
+    // weapon upgrades: just resume level-up state
+    this.game.events.on('weapon:upgraded', (_payload) => {
+      this._levelUpOpen = false;
+      this.scene.resume();
     });
 
     // Expose config for UI helpers

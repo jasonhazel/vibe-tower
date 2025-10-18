@@ -13,6 +13,7 @@ export class CheatMenu {
 		this.scene.game?.events?.on('tome:selected', this._onLevelClosed);
 		this.scene.game?.events?.on('tome:upgraded', this._onLevelClosed);
 		this.scene.game?.events?.on('tome:skipped', this._onLevelClosed);
+		this.scene.game?.events?.on('weapon:upgraded', this._onLevelClosed);
 		this.scene.scale?.on('resize', this._onResize);
 		this.render();
 	}
@@ -27,6 +28,7 @@ export class CheatMenu {
 		this.scene.game?.events?.off('tome:selected', this._onLevelClosed);
 		this.scene.game?.events?.off('tome:upgraded', this._onLevelClosed);
 		this.scene.game?.events?.off('tome:skipped', this._onLevelClosed);
+		this.scene.game?.events?.off('weapon:upgraded', this._onLevelClosed);
 		this.scene.scale?.off('resize', this._onResize);
 	}
 
