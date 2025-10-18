@@ -1,4 +1,5 @@
 import { WeaponBase } from './WeaponBase.js';
+import { playerState } from '../state/PlayerState.js';
 
 export class Aura extends WeaponBase {
   constructor(scene, context, config = {}) {
@@ -38,7 +39,8 @@ export class Aura extends WeaponBase {
       const distSq = dx * dx + dy * dy;
       if (distSq <= radiusSq) {
         // Apply player damage multiplier
-        const dmg = Math.max(0, Math.floor(this.damagePerTick * (window?.playerState?.getStats?.().damage || 1)));
+        const dmgMult = (playerState.getStats?.().damage ?? 1);
+        const dmg = Math.max(0, Math.floor(this.damagePerTick * dmgMult));
         const hp = enemy.getData('hp') - (dmg || this.damagePerTick);
         enemy.setData('hp', hp);
         if (hp <= 0) toRemove.push(enemy);
