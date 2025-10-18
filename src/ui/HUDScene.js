@@ -91,7 +91,21 @@ export class HUDScene extends Phaser.Scene {
       color: '#ffffff',
     }).setOrigin(0.5);
 
-    const onWeapons = (ids) => { this._lastWeaponIds = ids || []; this.weaponsRow.update(this._lastWeaponIds); };
+    const onWeapons = (ids) => {
+      this._lastWeaponIds = ids || [];
+      // fetch icon drawers from PlayScene weapon instances in order of ids
+      let iconDrawers = [];
+      try {
+        const play = this.scene.get('PlayScene');
+        if (play?.weaponManager?.weapons) {
+          iconDrawers = this._lastWeaponIds.map((id) => {
+            const inst = play.weaponManager.weapons.find(w => w.getId() === id);
+            return inst?.getSlotIconDrawer?.();
+          });
+        }
+      } catch (_) {}
+      this.weaponsRow.update(this._lastWeaponIds, iconDrawers);
+    };
     this.game.events.on('weapons:update', onWeapons);
     this.handlers.push(['weapons:update', onWeapons]);
 
@@ -129,7 +143,11 @@ export class HUDScene extends Phaser.Scene {
       const play = this.scene.get('PlayScene');
       if (play?.weaponManager) {
         this._lastWeaponIds = play.weaponManager.getWeaponIds();
-        this.weaponsRow.update(this._lastWeaponIds);
+        const drawers = this._lastWeaponIds.map((id) => {
+          const inst = play.weaponManager.weapons.find(w => w.getId() === id);
+          return inst?.getSlotIconDrawer?.();
+        });
+        this.weaponsRow.update(this._lastWeaponIds, drawers);
       }
     } catch (_) {}
     // Stats panel (top-right)

@@ -15,8 +15,9 @@ export class SlotRow {
     return this.draw();
   }
 
-  update(ids) {
+  update(ids, iconDrawers) {
     this.ids = ids || [];
+    this.iconDrawers = iconDrawers || [];
     return this.draw();
   }
 
@@ -34,8 +35,10 @@ export class SlotRow {
         slot.gfx.fillRoundedRect(sx, sy, size, size, 6);
         slot.gfx.lineStyle(2, 0x999999, 1);
         slot.gfx.strokeRoundedRect(sx, sy, size, size, 6);
-        slot.gfx.fillStyle(0x66bb6a, 1);
-        slot.gfx.fillCircle(sx + size/2, sy + size/2, 6);
+        const draw = this.iconDrawers?.[i];
+        if (typeof draw === 'function') {
+          draw(slot.gfx, sx, sy, size);
+        }
       } else {
         slot.gfx.lineStyle(2, 0x444444, 1);
         slot.gfx.strokeRoundedRect(sx, sy, size, size, 6);

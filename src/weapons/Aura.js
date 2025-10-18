@@ -20,6 +20,14 @@ export class Aura extends WeaponBase {
     return this.id;
   }
 
+  getSlotIconDrawer() {
+    return (gfx, x, y, size) => {
+      const r = Math.floor(size * 0.28);
+      gfx.lineStyle(2, 0x66bb6a, 1);
+      gfx.strokeCircle(x + size/2, y + size/2, r);
+    };
+  }
+
   update(deltaMs) {
     this.timer += deltaMs;
     if (this.timer >= this.tickIntervalMs) {

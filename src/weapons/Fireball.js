@@ -21,6 +21,14 @@ export class Fireball extends WeaponBase {
 
   getId() { return this.id; }
 
+  getSlotIconDrawer() {
+    return (gfx, x, y, size) => {
+      const r = Math.floor(size * 0.26);
+      gfx.fillStyle(0xff5252, 1);
+      gfx.fillCircle(x + size/2, y + size/2, r);
+    };
+  }
+
   update(deltaMs) {
     this.timer += deltaMs;
     // Move active projectiles
