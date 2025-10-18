@@ -63,6 +63,12 @@ class PlayScene extends Phaser.Scene {
 
     // Run timer text (bottom above XP bar)
     this.runTimerText = this.add.text(0, 0, '00:00', { fontFamily: 'monospace', fontSize: '16px', color: '#ffffff' }).setOrigin(0.5, 1);
+    // initial placement above XP bar
+    {
+      const margin = 12; const barH = 12; const slotsSize = 28; const gap = 8;
+      const xpY = GAME_HEIGHT - margin - slotsSize - gap - barH;
+      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - 10);
+    }
 
     // Enemies
     this.enemyManager = new EnemyManager(this, { centerX: cx, centerY: cy });
@@ -197,7 +203,7 @@ class PlayScene extends Phaser.Scene {
       // position timer above XP bar
       const margin = 12; const barH = 12; const slotsSize = 28; const gap = 8; // from hudTheme
       const xpY = GAME_HEIGHT - margin - slotsSize - gap - barH; // y of top of XP bar
-      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - 4);
+      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - 10);
       // update any weapons that support center updates (e.g., Fireball range ring)
       if (this.weaponManager?.weapons) {
         this.weaponManager.weapons.forEach(w => w.setCenter?.(this.centerX, this.centerY));
