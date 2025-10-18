@@ -109,7 +109,16 @@ export class HUDScene extends Phaser.Scene {
     this.game.events.on('weapons:update', onWeapons);
     this.handlers.push(['weapons:update', onWeapons]);
 
-    const onAux = (ids) => { this._lastAuxIds = ids || []; this.auxRow.update(this._lastAuxIds); };
+    const onAux = (ids) => {
+      this._lastAuxIds = ids || [];
+      // build tome icon drawers from TomeCatalog objects (ids are tome ids)
+      let drawers = [];
+      try {
+        const { TomeCatalog } = require('../perks/Tomes.js');
+        drawers = this._lastAuxIds.map((id) => TomeCatalog.find(t => t.id === id)?.getSlotIconDrawer?.());
+      } catch (_) {}
+      this.auxRow.update(this._lastAuxIds, drawers);
+    };
     this.game.events.on('tomes:update', onAux);
     this.handlers.push(['tomes:update', onAux]);
 

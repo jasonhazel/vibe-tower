@@ -1,12 +1,16 @@
+import { TomeArea } from './tomes/TomeArea.js';
+import { TomeDamage } from './tomes/TomeDamage.js';
+import { TomeProjectiles } from './tomes/TomeProjectiles.js';
+import { TomeAttackSpeed } from './tomes/TomeAttackSpeed.js';
+import { TomeXP } from './tomes/TomeXP.js';
 import { playerState } from '../state/PlayerState.js';
 
 export const TomeCatalog = [
-  { id: 'tome-area', name: 'Tome of Area', key: 'area', apply: () => playerState.addTome('area') },
-  { id: 'tome-damage', name: 'Tome of Damage', key: 'damage', apply: () => playerState.addTome('damage') },
-  { id: 'tome-projectiles', name: 'Tome of Projectiles', key: 'projectiles', apply: () => playerState.addTome('projectiles') },
-  { id: 'tome-attackSpeed', name: 'Tome of Attack Speed', key: 'attackSpeed', apply: () => playerState.addTome('attackSpeed') },
-  { id: 'tome-xp', name: 'Tome of Learning', key: 'xp', apply: () => playerState.addTome('xp') },
-  { id: 'tome-pickup', name: 'Tome of Magnetism', key: 'pickup', apply: () => playerState.addTome('pickup') },
+  new TomeArea(),
+  new TomeDamage(),
+  new TomeProjectiles(),
+  new TomeAttackSpeed(),
+  new TomeXP(),
 ];
 
 export function tomeUpgradeOptions(ownedIds) {
@@ -14,7 +18,7 @@ export function tomeUpgradeOptions(ownedIds) {
   const options = [];
   for (const t of TomeCatalog) {
     if (ownedIds.includes(t.id)) {
-      options.push({ id: `upg-${t.id}`, name: `${t.name}+`, isUpgrade: true, apply: () => playerState.upgradeTome(t.key) });
+      options.push({ id: `upg-${t.id}`, name: `${t.name}+`, isUpgrade: true, apply: () => playerState.upgradeTome(t.key), getSlotIconDrawer: () => t.getSlotIconDrawer?.() });
     }
   }
   return options;
