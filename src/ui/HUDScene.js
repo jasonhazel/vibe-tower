@@ -5,6 +5,7 @@ import { ProgressBar } from './components/ProgressBar.js';
 import { SlotRow } from './components/SlotRow.js';
 import { hudTheme } from './theme.js';
 import { StatsPanel } from './components/StatsPanel.js';
+import { Tooltip } from './components/Tooltip.js';
 
 export class HUDScene extends Phaser.Scene {
   constructor() {
@@ -29,6 +30,7 @@ export class HUDScene extends Phaser.Scene {
     this.auxSlots = [];
     this._auxSlotSize = 28;
     this._auxSlotGap = 6;
+    this.tooltip = null;
   }
 
   create() {
@@ -133,6 +135,8 @@ export class HUDScene extends Phaser.Scene {
     // Stats panel (top-right)
     this.statsPanel = new StatsPanel(this);
     this._layoutStatsPanel();
+    // Tooltip
+    this.tooltip = new Tooltip(this);
     // initialize values
     this.healthBar.setValue(playerState.getHealthCurrent(), playerState.getHealthMax()).draw();
     this.xpBar.setValue(playerState.getXpCurrent?.() ?? 0, playerState.getXpNeeded?.() ?? this._xpMaxPlaceholder).draw();
@@ -196,6 +200,8 @@ export class HUDScene extends Phaser.Scene {
 
     this.weaponsRow.setPosition(innerX, slotsY, innerW).update(this._lastWeaponIds || []);
     this.auxRow.setPosition(innerX, slotsY, innerW).update(this._lastAuxIds || []);
+    // Interactive zones for tooltips
+    this._wireSlotTooltips(innerX, slotsY, size, gap, innerW);
 
     const healthY = slotsY - gap - barH;
     const xpY = healthY - gap - barH;
@@ -222,6 +228,37 @@ export class HUDScene extends Phaser.Scene {
     const w = this.scale.gameSize.width;
     const margin = 12;
     this.statsPanel.setPosition(w - this.statsPanel.width - margin, margin);
+  }
+
+  _wireSlotTooltips(innerX, slotsY, size, gap, innerW) {
+    // Clear previous zones
+    if (this._slotZones) {
+      this._slotZones.forEach(z => z.destroy());
+    }
+    this._slotZones = [];
+    const makeZone = (x, y, labelFn) => {
+      const z = this.add.zone(x, y, size, size).setOrigin(0, 0).setInteractive({ useHandCursor: false });
+      z.on('pointerover', (p) => {
+        const label = labelFn();
+        if (label) this.tooltip.show(label, p.worldX + 12, p.worldY + 12);
+      });
+      z.on('pointermove', (p) => this.tooltip.move(p.worldX + 12, p.worldY + 12));
+      z.on('pointerout', () => this.tooltip.hide());
+      this._slotZones.push(z);
+    };
+    // weapon slots labels
+    for (let i = 0; i < 4; i++) {
+      const x = innerX + i * (size + gap);
+      const y = slotsY;
+      makeZone(x, y, () => this._lastWeaponIds?.[i] || null);
+    }
+    // tome (aux) slots labels
+    const startX = innerX + innerW - (4 * size + 3 * gap);
+    for (let i = 0; i < 4; i++) {
+      const x = startX + i * (size + gap);
+      const y = slotsY;
+      makeZone(x, y, () => this._lastAuxIds?.[i] || null);
+    }
   }
 }
 
