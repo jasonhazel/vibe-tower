@@ -14,7 +14,7 @@ export class Aura extends WeaponBase {
     // Visuals
     this.graphics = scene.add.graphics();
     this.graphics.lineStyle(2, 0x66bb6a, 0.65);
-    this.graphics.strokeCircle(context.centerX, context.centerY, this.radius);
+    this._redrawRange();
   }
 
   getId() {
@@ -96,18 +96,14 @@ export class Aura extends WeaponBase {
 
   setCenter(x, y) {
     // Redraw the ring at a new center
-    this.graphics.clear();
-    this.graphics.lineStyle(2, 0x66bb6a, 0.65);
-    this.graphics.strokeCircle(x, y, this.radius);
     this.context.centerX = x;
     this.context.centerY = y;
+    this._redrawRange();
   }
 
   setRadius(newRadius) {
     this.radius = Math.max(0, Math.floor(newRadius));
-    this.graphics.clear();
-    this.graphics.lineStyle(2, 0x66bb6a, 0.65);
-    this.graphics.strokeCircle(this.context.centerX, this.context.centerY, this.radius);
+    this._redrawRange();
   }
 
   destroy() {
@@ -115,6 +111,15 @@ export class Aura extends WeaponBase {
   }
 
   // damage numbers now handled by enemies themselves on hp change
+
+  _redrawRange() {
+    const { centerX, centerY } = this.context;
+    this.graphics.clear();
+    this.graphics.lineStyle(2, 0x66bb6a, 0.65);
+    const rp = this.getRuntimeParams?.(playerState) || { radius: this.radius };
+    const r = rp.radius ?? this.radius;
+    this.graphics.strokeCircle(centerX, centerY, r);
+  }
 }
 
 
