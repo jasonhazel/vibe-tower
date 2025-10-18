@@ -1,4 +1,4 @@
-import { TomeCatalog } from '../perks/Tomes.js';
+import { TomeCatalog, tomeUpgradeOptions } from '../perks/Tomes.js';
 import { playerState } from '../state/PlayerState.js';
 
 export class LevelUpScene extends Phaser.Scene {
@@ -24,11 +24,11 @@ export class LevelUpScene extends Phaser.Scene {
     this.add.text(w / 2, y + 18, 'Choose a Tome', { fontFamily: 'monospace', fontSize: '18px', color: '#ffffff' }).setOrigin(0.5);
 
     // Determine available tomes
-    const available = TomeCatalog.filter((t) => !chosenIds.includes(t.id));
-    const options = available.sort(() => Math.random() - 0.5).slice(0, 3);
-    const canChooseTomes = (chosenIds.length < maxTomes) && options.length > 0;
-
-    const items = canChooseTomes ? options : [];
+    const availableTomes = TomeCatalog.filter((t) => !chosenIds.includes(t.id));
+    const tomeOpts = (chosenIds.length < maxTomes) ? availableTomes : [];
+    const upgOpts = tomeUpgradeOptions(chosenIds);
+    const pool = [...tomeOpts, ...upgOpts];
+    const items = pool.sort(() => Math.random() - 0.5).slice(0, 3);
     const colW = 150;
     const startX = w / 2 - (items.length * colW + (items.length - 1) * 16) / 2;
     const by = y + 54;

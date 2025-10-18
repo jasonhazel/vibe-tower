@@ -22,6 +22,9 @@ class PlayerStateImpl {
       attackSpeed: 1,
       xp: 1,
     };
+    // Tome ownership and upgrade counts
+    this.tomes = { area: 0, damage: 0, projectiles: 0, attackSpeed: 0, xp: 0 };
+    this.tomeUpgrades = { area: 0, damage: 0, projectiles: 0, attackSpeed: 0, xp: 0 };
   }
 
   getXp() { return this.xpTotal; }
@@ -40,6 +43,36 @@ class PlayerStateImpl {
   modStat(name, delta) {
     if (!(name in this.stats)) return;
     this.setStat(name, this.stats[name] + delta);
+  }
+
+  // Tome system: recompute derived stats from tomes and upgrades
+  addTome(statKey) {
+    if (!(statKey in this.tomes)) return;
+    this.tomes[statKey] += 1;
+    this._recomputeStatsFromTomes();
+  }
+
+  upgradeTome(statKey) {
+    if (!(statKey in this.tomes)) return; // only for valid tomes
+    if (this.tomes[statKey] <= 0) return; // must own at least one
+    this.tomeUpgrades[statKey] += 1;
+    this._recomputeStatsFromTomes();
+  }
+
+  _recomputeStatsFromTomes() {
+    // base stats
+    const base = { area: 1, damage: 1, projectiles: 1, attackSpeed: 1, xp: 1 };
+    const inc = { area: 0.2, damage: 0.2, projectiles: 1, attackSpeed: 0.2, xp: 0.2 };
+    const multStep = 0.2; // each upgrade increases impact by +20%
+    const next = { ...base };
+    for (const key of Object.keys(this.tomes)) {
+      const count = this.tomes[key] || 0;
+      const upg = this.tomeUpgrades[key] || 0;
+      const per = inc[key] * (1 + multStep * upg);
+      next[key] = base[key] + count * per;
+    }
+    this.stats = next;
+    EventBus.emit('stats:update', this.getStats());
   }
 
   addXp(amount) {
