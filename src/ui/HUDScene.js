@@ -177,8 +177,13 @@ export class HUDScene extends Phaser.Scene {
     this.scale.on('resize', onResize);
     this.handlers.push(['__scale_resize__', onResize]);
 
-    // Debug admin: Cheat menu (upper-left)
-    this.cheatMenu = new CheatMenu(this);
+    // Debug admin: Cheat menu (upper-left) only when ?cheat=true
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('cheat') === 'true') {
+        this.cheatMenu = new CheatMenu(this);
+      }
+    } catch (_) {}
   }
 
   shutdown() {
