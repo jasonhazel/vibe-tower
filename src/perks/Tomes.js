@@ -14,7 +14,7 @@ export function tomeUpgradeOptions(ownedIds) {
   const options = [];
   for (const t of TomeCatalog) {
     if (ownedIds.includes(t.id)) {
-      options.push({ id: `upg-${t.id}`, name: `${t.name}+`, apply: () => playerState.upgradeTome(t.key) });
+      options.push({ id: `upg-${t.id}`, name: `${t.name}+`, isUpgrade: true, apply: () => playerState.upgradeTome(t.key) });
     }
   }
   return options;

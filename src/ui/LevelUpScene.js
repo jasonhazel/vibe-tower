@@ -56,7 +56,12 @@ export class LevelUpScene extends Phaser.Scene {
     items.forEach((t, i) => {
       makeBtn(startX + i * (colW + 16), by, t.name, () => {
         t.apply();
-        this.game.events.emit('tome:selected', t.id);
+        // Only add to tome slots if this is a new tome, not an upgrade
+        if (!t.isUpgrade) {
+          this.game.events.emit('tome:selected', t.id);
+        } else {
+          this.game.events.emit('tome:upgraded', t.id);
+        }
         this.scene.stop();
         this.scene.resume('PlayScene');
       });

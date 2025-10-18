@@ -235,6 +235,11 @@ class PlayScene extends Phaser.Scene {
       this.scene.resume();
       this.game.events.emit('tomes:update', this._chosenTomes);
     });
+    this.game.events.on('tome:upgraded', (_id) => {
+      this._levelUpOpen = false;
+      this.scene.resume();
+      // no change to tome slots
+    });
     this.game.events.on('tome:skipped', () => {
       this._levelUpOpen = false;
       this.scene.resume();
