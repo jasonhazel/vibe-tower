@@ -127,7 +127,7 @@ class PlayScene extends Phaser.Scene {
       const newAuraR = Math.floor(gameConfig.aura.radius * areaMul);
       this._auraRef?.setRadius(newAuraR);
       const pickupMul = (stats?.pickup || 1);
-      const newPickupR = Math.floor(gameConfig.xpPickup.baseRadius * pickupMul);
+      const newPickupR = Math.floor(gameConfig.xpPickup.baseRadius * pickupMul * areaMul);
       playerState.setPickupRadius?.(newPickupR);
       this.pickupRadiusVisual?.setRadius?.(newPickupR);
       // update fireball range ring visuals
