@@ -8,6 +8,12 @@ export class TomeXP extends TomeBase {
     this.key = 'xp';
   }
 
+  getModifiers({ tomeLevel = 0, upgradeCount = 0 } = {}) {
+    // XP tome uses 0.20 per level and 0.45 per upgrade (as per design)
+    const mult = 1 + 0.20 * tomeLevel + 0.45 * upgradeCount;
+    return [{ stat: 'xp', type: 'mult', value: mult }];
+  }
+
   getSlotIconDrawer() {
     return (gfx, x, y, size) => {
       const r = Math.floor(size * 0.22);

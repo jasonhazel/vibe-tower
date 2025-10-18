@@ -1,4 +1,5 @@
 import { EventBus } from './EventBus.js';
+import { TomeCatalog } from '../items/tomes/Tomes.js';
 
 class PlayerStateImpl {
   constructor() {
@@ -15,7 +16,7 @@ class PlayerStateImpl {
     this.healthMax = 100;
     this.shield = 0;
     this.pickupRadius = null; // null -> use gameConfig default
-    // Stat multipliers (tuned via perks)
+    // Stat multipliers (computed from tomes + upgrades via stat engine)
     this.stats = {
       area: 1,
       damage: 1,
@@ -24,9 +25,8 @@ class PlayerStateImpl {
       xp: 1,
       pickup: 1,
     };
-    // Tome ownership and upgrade counts
-    this.tomes = { area: 0, damage: 0, projectiles: 0, attackSpeed: 0, xp: 0, pickup: 0 };
-    this.tomeUpgrades = { area: 0, damage: 0, projectiles: 0, attackSpeed: 0, xp: 0, pickup: 0 };
+    // Tome state: { [tomeId]: { level: number, upgrades: number, key: string } }
+    this.tomeState = {};
   }
 
   getXp() { return this.xpTotal; }
@@ -48,35 +48,63 @@ class PlayerStateImpl {
     this.setStat(name, this.stats[name] + delta);
   }
 
-  // Tome system: recompute derived stats from tomes and upgrades
-  addTome(statKey) {
-    if (!(statKey in this.tomes)) return;
-    this.tomes[statKey] += 1;
+  // Tome system (by tomeId)
+  addTomeById(tomeId) {
+    const tome = TomeCatalog.find(t => t.id === tomeId);
+    if (!tome) return;
+    if (!this.tomeState[tomeId]) {
+      this.tomeState[tomeId] = { level: 0, upgrades: 0, key: tome.key };
+    }
+    this.tomeState[tomeId].level += 1;
     this._recomputeStatsFromTomes();
+  }
+
+  upgradeTomeById(tomeId) {
+    const s = this.tomeState[tomeId];
+    if (!s || s.level <= 0) return; // must own
+    s.upgrades += 1;
+    this._recomputeStatsFromTomes();
+  }
+
+  // Back-compat helpers (by stat key)
+  addTome(statKey) {
+    const tome = TomeCatalog.find(t => t.key === statKey);
+    if (tome) this.addTomeById(tome.id);
   }
 
   upgradeTome(statKey) {
-    if (!(statKey in this.tomes)) return; // only for valid tomes
-    if (this.tomes[statKey] <= 0) return; // must own at least one
-    this.tomeUpgrades[statKey] += 1;
-    this._recomputeStatsFromTomes();
+    const tome = TomeCatalog.find(t => t.key === statKey);
+    if (tome) this.upgradeTomeById(tome.id);
+  }
+
+  getTomeState() {
+    return JSON.parse(JSON.stringify(this.tomeState));
   }
 
   _recomputeStatsFromTomes() {
-    // base stats
-    const base = { area: 1, damage: 1, projectiles: 1, attackSpeed: 1, xp: 1, pickup: 1 };
-    const inc = { area: 0.2, damage: 0.2, projectiles: 1, attackSpeed: 0.2, xp: 0.2, pickup: 0.2 };
-    const multStep = 0.15; // default upgrade step
-    const next = { ...base };
-    for (const key of Object.keys(this.tomes)) {
-      const count = this.tomes[key] || 0;
-      const upg = this.tomeUpgrades[key] || 0;
-      const step = (key === 'xp') ? 0.45 : (key === 'projectiles' ? 1 : multStep);
-      // Total multiplier = base + (#tomes * per-tome increment) + (upgrades * step)
-      next[key] = base[key] + count * inc[key] + upg * step;
+    // Base stats
+    const next = { area: 1, damage: 1, projectiles: 1, attackSpeed: 1, xp: 1, pickup: 1 };
+    // Aggregate from each owned tome via its modifiers
+    for (const tomeId of Object.keys(this.tomeState)) {
+      const tome = TomeCatalog.find(t => t.id === tomeId);
+      if (!tome) continue;
+      const { level, upgrades } = this.tomeState[tomeId];
+      const mods = (tome.getModifiers?.({ tomeLevel: level, upgradeCount: upgrades }) || []);
+      for (const m of mods) {
+        if (!m || !m.stat || !(m.stat in next)) continue;
+        const type = m.type || 'mult';
+        const val = Number(m.value) || 0;
+        if (type === 'mult') next[m.stat] *= Math.max(0, val || 1);
+        else if (type === 'add') next[m.stat] += val;
+        else if (type === 'set') next[m.stat] = val;
+      }
     }
+    // Normalize integer stats
+    next.projectiles = Math.max(1, Math.floor(next.projectiles));
+
+    const changed = JSON.stringify(this.stats) !== JSON.stringify(next);
     this.stats = next;
-    EventBus.emit('stats:update', this.getStats());
+    if (changed) EventBus.emit('stats:update', this.getStats());
   }
 
   addXp(amount) {

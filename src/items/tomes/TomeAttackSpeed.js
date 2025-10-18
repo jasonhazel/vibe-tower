@@ -8,6 +8,11 @@ export class TomeAttackSpeed extends TomeBase {
     this.key = 'attackSpeed';
   }
 
+  getModifiers({ tomeLevel = 0, upgradeCount = 0 } = {}) {
+    const mult = 1 + 0.20 * tomeLevel + 0.15 * upgradeCount;
+    return [{ stat: 'attackSpeed', type: 'mult', value: mult }];
+  }
+
   getSlotIconDrawer() {
     return (gfx, x, y, size) => {
       const cx = x + size / 2;

@@ -16,11 +16,11 @@ export const TomeCatalog = [
 ];
 
 export function tomeUpgradeOptions(ownedIds) {
-  // For each owned tome id, produce an upgrade option
   const options = [];
   for (const t of TomeCatalog) {
     if (ownedIds.includes(t.id)) {
-      options.push({ id: `upg-${t.id}`, name: `${t.name}+`, isUpgrade: true, apply: () => playerState.upgradeTome(t.key), getSlotIconDrawer: () => t.getSlotIconDrawer?.() });
+      const opts = t.getUpgradeOptions?.(playerState) || [];
+      options.push(...opts);
     }
   }
   return options;

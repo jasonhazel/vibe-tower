@@ -55,7 +55,7 @@ export class LevelUpScene extends Phaser.Scene {
     // Tome options
     items.forEach((t, i) => {
       makeBtn(startX + i * (colW + 16), by, t.name, () => {
-        t.apply();
+        t.apply(playerState);
         // Only add to tome slots if this is a new tome, not an upgrade
         if (!t.isUpgrade) {
           this.game.events.emit('tome:selected', t.id);
