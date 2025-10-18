@@ -64,7 +64,7 @@ class PlayerStateImpl {
     // base stats
     const base = { area: 1, damage: 1, projectiles: 1, attackSpeed: 1, xp: 1, pickup: 1 };
     const inc = { area: 0.2, damage: 0.2, projectiles: 1, attackSpeed: 0.2, xp: 0.2, pickup: 0.2 };
-    const multStep = 0.2; // each upgrade increases impact by +20%
+    const multStep = 0.15; // each upgrade increases impact by +0.15
     const next = { ...base };
     for (const key of Object.keys(this.tomes)) {
       const count = this.tomes[key] || 0;
