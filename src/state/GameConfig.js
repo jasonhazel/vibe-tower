@@ -18,7 +18,7 @@ export const gameConfig = {
   },
   enemy: {
     baseSpeed: 40,
-    baseHp: 50,
+    baseHp: 40,
   },
   player: {
     baseHealth: 100,

@@ -87,6 +87,9 @@ class PlayScene extends Phaser.Scene {
     this.weaponManager.add(aura);
     this._auraRef = aura;
 
+    // Ensure HUD has the initial weapon list even if it mounted later
+    this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());
+
     // Resize handling: keep player centered without changing relative positions
     this.scale.on('resize', (gameSize) => {
       GAME_WIDTH = gameSize.width;
