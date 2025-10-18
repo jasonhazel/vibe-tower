@@ -109,6 +109,16 @@ export class StatsPanel {
 							['Fire rad', `${rp.radius ?? w.radius}`],
 						],
 					});
+				} else if (id === 'slam') {
+					groups.push({
+						name: 'Slam',
+						entries: [
+							['Slam cd', `${rp.cooldownMs ?? w.cooldownMs}ms`],
+							['Slam dmg', `${rp.damage ?? w.baseDamage}`],
+							['Slam maxR', `${rp.maxRadius ?? w.maxRadius}`],
+							['Slam grow', `${Math.round(rp.growthSpeed ?? w.growthSpeed)}/s`],
+						],
+					});
 				}
 			}
 		} catch (_) {}
