@@ -121,8 +121,15 @@ class PlayScene extends Phaser.Scene {
 
     // Restart handler
     this.game.events.on('game:restart', () => {
-      this.scene.restart();
+      // Reset player progress/state and scene timers
+      playerState.reset();
+      playerState.setPickupRadius?.(gameConfig.xpPickup.baseRadius);
+      this.runMs = 0;
+      this.enemyHpBonus = 0;
+      this._difficultyTimer = 0;
+      this._gameOverShown = false;
       this.scene.stop('GameOver');
+      this.scene.restart();
     });
   }
 
