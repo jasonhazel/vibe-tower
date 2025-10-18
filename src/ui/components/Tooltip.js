@@ -13,12 +13,13 @@ export class Tooltip {
     this.text.setText(txt);
     const w = this.text.width + this.padding * 2;
     const h = this.text.height + this.padding * 2;
+    const ty = y - h - 8; // position above cursor
     this.bg.clear();
     this.bg.fillStyle(0x111111, 0.9);
-    this.bg.fillRoundedRect(x, y, w, h, 6);
+    this.bg.fillRoundedRect(x, ty, w, h, 6);
     this.bg.lineStyle(1, 0x444444, 1);
-    this.bg.strokeRoundedRect(x, y, w, h, 6);
-    this.text.setPosition(x + this.padding, y + this.padding);
+    this.bg.strokeRoundedRect(x, ty, w, h, 6);
+    this.text.setPosition(x + this.padding, ty + this.padding);
     this.bg.setVisible(true);
     this.text.setVisible(true);
   }
@@ -27,13 +28,14 @@ export class Tooltip {
     if (!this.bg.visible) return;
     const w = this.text.width + this.padding * 2;
     const h = this.text.height + this.padding * 2;
-    this.bg.setPosition(x, y);
+    const ty = y - h - 8; // keep above cursor while moving
+    this.bg.setPosition(x, ty);
     this.bg.clear();
     this.bg.fillStyle(0x111111, 0.9);
-    this.bg.fillRoundedRect(x, y, w, h, 6);
+    this.bg.fillRoundedRect(x, ty, w, h, 6);
     this.bg.lineStyle(1, 0x444444, 1);
-    this.bg.strokeRoundedRect(x, y, w, h, 6);
-    this.text.setPosition(x + this.padding, y + this.padding);
+    this.bg.strokeRoundedRect(x, ty, w, h, 6);
+    this.text.setPosition(x + this.padding, ty + this.padding);
   }
 
   hide() {
