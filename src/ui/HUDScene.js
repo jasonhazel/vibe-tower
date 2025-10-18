@@ -172,7 +172,8 @@ export class HUDScene extends Phaser.Scene {
     const drawToggle = () => {
       const w = this.scale.gameSize.width;
       const margin = 12;
-      const x = w - this.statsPanel.width - margin - toggleW - 6;
+      // Place icon at the top-right corner independent of panel width
+      const x = w - margin - toggleW;
       const y = margin;
       this._statsToggleG.clear();
       // icon (simple bars) - white only, no background
@@ -191,7 +192,7 @@ export class HUDScene extends Phaser.Scene {
     const updateTogglePos = () => {
       const w = this.scale.gameSize.width;
       const margin = 12;
-      const x = w - this.statsPanel.width - margin - toggleW - 6;
+      const x = w - margin - toggleW;
       const y = margin;
       this._statsToggleZone.setPosition(x, y);
       drawToggle();
