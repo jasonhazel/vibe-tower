@@ -46,7 +46,7 @@ export class StatsPanel {
     if (this.scene && this.scene.scale) {
       const basePickup = window?.gameConfig?.xpPickup?.baseRadius || 60;
       const baseAura = window?.gameConfig?.aura?.radius || 100;
-      const pickupR = Math.floor(basePickup * (stats.pickup || 1));
+      const pickupR = Math.floor(basePickup * (stats.pickup || 1) * (stats.area || 1));
       const auraR = Math.floor(baseAura * (stats.area || 1));
       entries.push(['Pickup R', String(pickupR)]);
       entries.push(['Aura R', String(auraR)]);
