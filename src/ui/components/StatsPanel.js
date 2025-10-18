@@ -92,7 +92,7 @@ export class StatsPanel {
 					groups.push({
 						name: 'Aura',
 						entries: [
-							['Aura tick', `${rp.tickIntervalMs ?? w.tickIntervalMs}ms`],
+							['Aura cd', `${rp.cooldownMs ?? w.cooldownMs}ms`],
 							['Aura dmg', `${rp.damagePerTick ?? w.damagePerTick}`],
 							['Aura rad', `${rp.radius ?? w.radius}`],
 						],

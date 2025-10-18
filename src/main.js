@@ -87,7 +87,7 @@ class PlayScene extends Phaser.Scene {
     const owned = Object.keys(ws || {}).filter(id => ws[id]?.level > 0);
     const addAura = () => {
       const aura = new Aura(this, this.weaponManager.context, {
-        tickIntervalMs: gameConfig.aura.tickIntervalMs,
+        cooldownMs: gameConfig.aura.tickIntervalMs,
         damagePerTick: gameConfig.aura.damagePerTick,
         radius: gameConfig.aura.radius,
       });

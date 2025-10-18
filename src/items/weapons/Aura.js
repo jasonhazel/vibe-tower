@@ -5,7 +5,8 @@ export class Aura extends WeaponBase {
   constructor(scene, context, config = {}) {
     super(scene, context);
     this.id = 'aura';
-    this.tickIntervalMs = config.tickIntervalMs ?? 250;
+    // unify terminology: cooldownMs (accept legacy tickIntervalMs)
+    this.cooldownMs = config.cooldownMs ?? config.tickIntervalMs ?? 250;
     this.damagePerTick = config.damagePerTick ?? 5;
     this.radius = config.radius ?? 100;
     this.timer = 0;
@@ -27,7 +28,7 @@ export class Aura extends WeaponBase {
     return [
       mk('damage', 'Damage+'),
       mk('radius', 'Radius+'),
-      mk('tick', 'Tick Faster'),
+      mk('tick', 'Faster Cooldown'),
     ];
   }
 
@@ -41,7 +42,7 @@ export class Aura extends WeaponBase {
     return {
       damagePerTick: Math.max(1, Math.floor(this.damagePerTick * dmgMult)),
       radius: Math.max(1, Math.floor(this.radius * radiusMult)),
-      tickIntervalMs: Math.max(60, Math.floor(this.tickIntervalMs * tickMult)),
+      cooldownMs: Math.max(60, Math.floor(this.cooldownMs * tickMult)),
     };
   }
 
@@ -56,7 +57,7 @@ export class Aura extends WeaponBase {
   update(deltaMs) {
     const rp = this.getRuntimeParams(playerState);
     this.timer += deltaMs;
-    if (this.timer >= rp.tickIntervalMs) {
+    if (this.timer >= rp.cooldownMs) {
       this.timer = 0;
       this.applyDamage(rp);
     }
