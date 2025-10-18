@@ -214,8 +214,15 @@ export class HUDScene extends Phaser.Scene {
     const drawRestart = () => {
       const margin = 12; const x = margin; const y = margin;
       this._restartG.clear();
-      this._restartG.lineStyle(1, 0xffffff, 1);
-      this._restartG.strokeRect(x, y, restartW, restartH);
+      this._restartG.lineStyle(2, 0xffffff, 1);
+      // draw full rectangle path to avoid missing edge due to pixel alignment
+      this._restartG.beginPath();
+      this._restartG.moveTo(x, y);
+      this._restartG.lineTo(x + restartW, y);
+      this._restartG.lineTo(x + restartW, y + restartH);
+      this._restartG.lineTo(x, y + restartH);
+      this._restartG.closePath();
+      this._restartG.strokePath();
       this._restartText.setPosition(x + restartW / 2, y + restartH / 2);
     };
     drawRestart();
