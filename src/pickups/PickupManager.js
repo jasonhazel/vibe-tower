@@ -54,10 +54,16 @@ export class PickupManager {
         const r = ar + br;
         if (dx * dx + dy * dy <= r * r) {
           // merge b into a
-          const sum = (a.getData('amount') || 1) + (b.getData('amount') || 1);
+          const aval = a.getData('amount') || 1;
+          const bval = b.getData('amount') || 1;
+          const sum = aval + bval;
           a.setData('amount', sum);
+          // size scales gently with amount
+          const scale = Math.min(2, 1 + 0.06 * (sum - 1));
+          a.setScale(scale);
+          a.setData('mergeR', 7 * scale);
           // visual nudge
-          this.scene.tweens.add({ targets: a, scale: { from: 1.0, to: 1.15 }, yoyo: true, duration: 120, ease: 'sine.out' });
+          this.scene.tweens.add({ targets: a, scale: { from: scale * 1.0, to: scale * 1.15 }, yoyo: true, duration: 120, ease: 'sine.out' });
           b.destroy();
         }
       }
