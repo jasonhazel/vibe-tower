@@ -3,6 +3,7 @@ import { TomeDamage } from './tomes/TomeDamage.js';
 import { TomeProjectiles } from './tomes/TomeProjectiles.js';
 import { TomeAttackSpeed } from './tomes/TomeAttackSpeed.js';
 import { TomeXP } from './tomes/TomeXP.js';
+import { TomePickup } from './tomes/TomePickup.js';
 import { playerState } from '../state/PlayerState.js';
 
 export const TomeCatalog = [
@@ -11,6 +12,7 @@ export const TomeCatalog = [
   new TomeProjectiles(),
   new TomeAttackSpeed(),
   new TomeXP(),
+  new TomePickup(),
 ];
 
 export function tomeUpgradeOptions(ownedIds) {
