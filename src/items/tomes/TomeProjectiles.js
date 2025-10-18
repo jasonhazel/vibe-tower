@@ -8,10 +8,15 @@ export class TomeProjectiles extends TomeBase {
     this.key = 'projectiles';
   }
 
-  getModifiers({ tomeLevel = 0, upgradeCount = 0 } = {}) {
-    // Integer-based: base 1 + level + upgrades
-    const val = 1 + (tomeLevel || 0) + (upgradeCount || 0);
+  getModifiers({ tomeLevel = 0 } = {}) {
+    // Integer-based: base 1 + level
+    const val = 1 + (tomeLevel || 0);
     return [{ stat: 'projectiles', type: 'set', value: val }];
+  }
+
+  rollImpact() {
+    // Projectiles increase is fixed per level (+1)
+    return { rarityId: 'common', rarityName: 'Common', rarityColor: '#b0bec5', value: 1 };
   }
 
   getSlotIconDrawer() {

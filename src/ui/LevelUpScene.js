@@ -87,17 +87,34 @@ export class LevelUpScene extends Phaser.Scene {
       zone.on('pointerup', () => { draw(); onClick?.(); });
     };
 
-    // Stacked options
+    // Stacked options with rarity rolls for tomes and weapon upgrades
+    const play = this.scene.get('PlayScene');
     items.forEach((t, i) => {
-      makeBtn(bx, by + i * 52, t.name, () => {
-        // Apply choice
-        t.apply(playerState);
+      let roll = null;
+      if (!t.isWeapon) {
+        roll = t.rollImpact?.() || null;
+      } else if (t.isUpgrade && t.rollImpact) {
+        // get weapon instance from PlayScene
+        const wInst = play?.weaponManager?.weapons?.find?.(w => w.getId?.() === t.weaponId);
+        roll = t.rollImpact(wInst) || null;
+      }
+      const rollText = roll ? `  [${roll.rarityName || 'Roll'} +${(roll.value ?? 0).toFixed(2)}]` : '';
+      const label = `${t.name}${rollText}`;
+      makeBtn(bx, by + i * 52, label, () => {
+        // Apply choice (include roll for tomes)
+        if (!t.isWeapon) {
+          t.apply(playerState, { roll });
+        } else {
+          t.apply(playerState);
+        }
         // Branch by type
         if (t.isWeapon) {
           if (!t.isUpgrade && t.weaponId) {
             // unlock: ask PlayScene to instantiate and equip
             this.game.events.emit('weapon:add', t.weaponId);
           } else if (t.isUpgrade && t.weaponId) {
+            // pass rolled value to weapon upgrade
+            playerState.upgradeWeaponById?.(t.weaponId, t.upgradeKey, roll?.value);
             this.game.events.emit('weapon:upgraded', { weaponId: t.weaponId, key: t.upgradeKey });
           }
           // weapon upgrades don't change tome slots
@@ -106,6 +123,7 @@ export class LevelUpScene extends Phaser.Scene {
           if (!t.isUpgrade) {
             this.game.events.emit('tome:selected', t.id);
           } else {
+            playerState.upgradeTomeById?.(t.id, roll?.value);
             this.game.events.emit('tome:upgraded', t.id);
           }
         }

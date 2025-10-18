@@ -26,6 +26,13 @@ class PlayScene extends Phaser.Scene {
     this.enemies = null;
     this.spawnTimer = 0;
     this.spawnIntervalMs = gameConfig.spawnIntervalMs;
+    this.spawnBatchCount = 1; // enemies per spawn tick
+    this.spawnBatchTickMs = 30000; // +1 every 30s
+    this._spawnBatchTimer = 0;
+    // Global enemy speed scaling
+    this.enemySpeedMul = 1; // x1 base
+    this.enemySpeedTickMs = 30000; // every 30s
+    this._enemySpeedTimer = 0;
     this.runMs = 0;
     this.enemyHpBonus = 0; // increases over time
     this.difficultyTickMs = 10000; // every 10s
@@ -56,6 +63,8 @@ class PlayScene extends Phaser.Scene {
       // restore run timer and difficulty if available
       if (typeof saved.runMs === 'number') this.runMs = saved.runMs;
       if (typeof saved.enemyHpBonus === 'number') this.enemyHpBonus = saved.enemyHpBonus;
+      if (typeof saved.spawnBatchCount === 'number') this.spawnBatchCount = Math.max(1, Math.floor(saved.spawnBatchCount));
+      if (typeof saved.enemySpeedMul === 'number') this.enemySpeedMul = Math.max(0.1, Number(saved.enemySpeedMul));
       // prevent immediate level-up dialog if we already handled current level
       this._lastLevel = playerState.getLevel?.() ?? 1;
       // defer managers until after we construct them below
@@ -264,6 +273,10 @@ class PlayScene extends Phaser.Scene {
       this.runMs = 0;
       this.enemyHpBonus = 0;
       this._difficultyTimer = 0;
+      this.spawnBatchCount = 1;
+      this._spawnBatchTimer = 0;
+      this.enemySpeedMul = 1;
+      this._enemySpeedTimer = 0;
       this._gameOverShown = false;
       // Clear tome slots in HUD immediately
       this._chosenTomes = [];
@@ -284,7 +297,7 @@ class PlayScene extends Phaser.Scene {
     this.spawnTimer += delta;
     if (this.spawnTimer >= this.spawnIntervalMs) {
       this.spawnTimer = 0;
-      this.spawnEnemy();
+      for (let i = 0; i < this.spawnBatchCount; i++) this.spawnEnemy();
     }
 
     // Update enemies
@@ -303,6 +316,16 @@ class PlayScene extends Phaser.Scene {
     if (this._difficultyTimer >= this.difficultyTickMs) {
       this._difficultyTimer = 0;
       this.enemyHpBonus += 1;
+    }
+    this._spawnBatchTimer += delta;
+    if (this._spawnBatchTimer >= this.spawnBatchTickMs) {
+      this._spawnBatchTimer = 0;
+      this.spawnBatchCount += 1;
+    }
+    this._enemySpeedTimer += delta;
+    if (this._enemySpeedTimer >= this.enemySpeedTickMs) {
+      this._enemySpeedTimer = 0;
+      this.enemySpeedMul = Math.round((this.enemySpeedMul * 1.10) * 100) / 100; // +10%
     }
     const totalSeconds = Math.floor(this.runMs / 1000);
     const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
@@ -364,6 +387,8 @@ class PlayScene extends Phaser.Scene {
         player: playerState.toJSON(),
         runMs: this.runMs,
         enemyHpBonus: this.enemyHpBonus,
+        spawnBatchCount: this.spawnBatchCount,
+        enemySpeedMul: this.enemySpeedMul,
         enemies: this.enemyManager?.toJSON?.() || [],
         pickups: this.pickups?.toJSON?.() || [],
       };

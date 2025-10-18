@@ -49,7 +49,9 @@ export class EnemyManager {
       const inst = this.instances[i];
       const go = inst.getGO();
       if (go && go.active) {
-        inst.update(deltaMs);
+        // Apply global enemy speed multiplier from scene, if present
+        const mul = Math.max(0.1, Number(this.scene?.enemySpeedMul ?? 1));
+        inst.update(deltaMs * mul);
         next.push(inst);
       } else {
         inst.onDestroy?.();

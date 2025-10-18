@@ -25,7 +25,7 @@ class PlayerStateImpl {
       xp: 1,
       pickup: 1,
     };
-    // Tome state: { [tomeId]: { level: number, upgrades: number, key: string } }
+    // Tome state: { [tomeId]: { level: number, key: string, rolls?: number[] } }
     this.tomeState = {};
     // Weapon state: { [weaponId]: { level: number, upgrades: { [k:string]: number } } }
     this.weaponState = {};
@@ -53,20 +53,27 @@ class PlayerStateImpl {
   }
 
   // Tome system (by tomeId)
-  addTomeById(tomeId) {
+  addTomeById(tomeId, rollValue) {
     const tome = TomeCatalog.find(t => t.id === tomeId);
     if (!tome) return;
     if (!this.tomeState[tomeId]) {
-      this.tomeState[tomeId] = { level: 0, upgrades: 0, key: tome.key };
+      this.tomeState[tomeId] = { level: 0, key: tome.key, rolls: [] };
     }
     this.tomeState[tomeId].level += 1;
+    if (typeof rollValue === 'number' && isFinite(rollValue)) {
+      this.tomeState[tomeId].rolls.push(rollValue);
+    }
     this._recomputeStatsFromTomes();
   }
 
-  upgradeTomeById(tomeId) {
+  upgradeTomeById(tomeId, rollValue) {
     const s = this.tomeState[tomeId];
-    if (!s || s.level <= 0) return; // must own
-    s.upgrades += 1;
+    if (!s || s.level <= 0) return; // must own first
+    s.level += 1;
+    if (typeof rollValue === 'number' && isFinite(rollValue)) {
+      s.rolls = s.rolls || [];
+      s.rolls.push(rollValue);
+    }
     this._recomputeStatsFromTomes();
   }
 
@@ -100,11 +107,16 @@ class PlayerStateImpl {
     EventBus.emit('stats:update', this.getStats());
   }
 
-  upgradeWeaponById(weaponId, upgKey) {
+  upgradeWeaponById(weaponId, upgKey, rollValue) {
     if (!weaponId || !upgKey) return;
     const s = this.weaponState[weaponId];
     if (!s || s.level <= 0) return;
-    s.upgrades[upgKey] = (s.upgrades[upgKey] || 0) + 1;
+    if (typeof rollValue === 'number' && isFinite(rollValue)) {
+      // store cumulative additive percentage or integer for projectiles
+      s.upgrades[`roll_${upgKey}`] = (s.upgrades[`roll_${upgKey}`] || 0) + rollValue;
+    } else {
+      s.upgrades[upgKey] = (s.upgrades[upgKey] || 0) + 1;
+    }
     EventBus.emit('stats:update', this.getStats());
   }
 
@@ -115,8 +127,8 @@ class PlayerStateImpl {
     for (const tomeId of Object.keys(this.tomeState)) {
       const tome = TomeCatalog.find(t => t.id === tomeId);
       if (!tome) continue;
-      const { level, upgrades } = this.tomeState[tomeId];
-      const mods = (tome.getModifiers?.({ tomeLevel: level, upgradeCount: upgrades }) || []);
+      const { level, rolls } = this.tomeState[tomeId];
+      const mods = (tome.getModifiers?.({ tomeLevel: level, rolls: rolls || [] }) || []);
       for (const m of mods) {
         if (!m || !m.stat || !(m.stat in next)) continue;
         const type = m.type || 'mult';

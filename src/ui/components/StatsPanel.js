@@ -83,15 +83,19 @@ export class StatsPanel {
 		// Groups: player first, then each owned tome, then weapons
 		const groups = [{ name: 'Player', entries: playerEntries }];
 		try {
-			const tomeState = playerState.getTomeState?.() || {};
-			const ownedTomeIds = Object.keys(tomeState).filter(id => (tomeState[id]?.level || 0) > 0);
-			ownedTomeIds.forEach((tid) => {
-				const t = TomeCatalog.find(x => x.id === tid);
-				if (!t) return;
-				const level = tomeState[tid]?.level || 0;
-				const upgrades = tomeState[tid]?.upgrades || 0;
-				const mods = t.getModifiers?.({ tomeLevel: level, upgradeCount: upgrades }) || [];
-				const entries = [ ['Level', String(level)], ['Upgrades', String(upgrades)] ];
+            const tomeState = playerState.getTomeState?.() || {};
+            const ownedTomeIds = Object.keys(tomeState).filter(id => (tomeState[id]?.level || 0) > 0);
+            ownedTomeIds.forEach((tid) => {
+                const t = TomeCatalog.find(x => x.id === tid);
+                if (!t) return;
+                const level = tomeState[tid]?.level || 0;
+                const rolls = tomeState[tid]?.rolls || [];
+                const mods = t.getModifiers?.({ tomeLevel: level, rolls }) || [];
+                const entries = [ ['Level', String(level)] ];
+                if ((rolls?.length || 0) > 0) {
+                    const sum = rolls.reduce((a, b) => a + (Number(b)||0), 0);
+                    entries.push(['Rolled', `+${sum.toFixed(2)}`]);
+                }
 				for (const m of mods) {
 					if (!m || !m.stat) continue;
 					const statName = String(m.stat);

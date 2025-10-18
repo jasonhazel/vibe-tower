@@ -8,8 +8,9 @@ export class TomePickup extends TomeBase {
     this.key = 'pickup';
   }
 
-  getModifiers({ tomeLevel = 0, upgradeCount = 0 } = {}) {
-    const mult = 1 + 0.20 * tomeLevel + 0.15 * upgradeCount;
+  getModifiers({ tomeLevel = 0, rolls = [] } = {}) {
+    const sum = rolls.reduce((a, b) => a + (Number(b) || 0), 0);
+    const mult = 1 + (sum > 0 ? sum : 0.20 * tomeLevel);
     return [{ stat: 'pickup', type: 'mult', value: mult }];
   }
 

@@ -8,9 +8,10 @@ export class TomeXP extends TomeBase {
     this.key = 'xp';
   }
 
-  getModifiers({ tomeLevel = 0, upgradeCount = 0 } = {}) {
-    // XP tome uses 0.20 per level and 0.45 per upgrade (as per design)
-    const mult = 1 + 0.20 * tomeLevel + 0.45 * upgradeCount;
+  getModifiers({ tomeLevel = 0, rolls = [] } = {}) {
+    // XP tome uses rolls if present, otherwise fallback to 0.20 per level
+    const sum = rolls.reduce((a, b) => a + (Number(b) || 0), 0);
+    const mult = 1 + (sum > 0 ? sum : 0.20 * tomeLevel);
     return [{ stat: 'xp', type: 'mult', value: mult }];
   }
 
