@@ -2,6 +2,7 @@
 
 import { WeaponManager } from './weapons/WeaponManager.js';
 import { Aura } from './weapons/Aura.js';
+import { Fireball } from './weapons/Fireball.js';
 import { EnemyManager } from './enemies/EnemyManager.js';
 import { HUDScene } from './ui/HUDScene.js';
 import { GameOverScene } from './ui/GameOverScene.js';
@@ -88,6 +89,16 @@ class PlayScene extends Phaser.Scene {
       });
     this.weaponManager.add(aura);
     this._auraRef = aura;
+
+    // Add fireball by default as a starting weapon
+    const fireball = new Fireball(this, this.weaponManager.context, {
+      baseCooldownMs: gameConfig.fireball.baseCooldownMs,
+      projectileSpeed: gameConfig.fireball.projectileSpeed,
+      range: gameConfig.fireball.range,
+      baseDamage: gameConfig.fireball.baseDamage,
+      radius: gameConfig.fireball.radius,
+    });
+    this.weaponManager.add(fireball);
 
     // Ensure HUD has the initial weapon list even if it mounted later
     this.game.events.emit('weapons:update', this.weaponManager.getWeaponIds());

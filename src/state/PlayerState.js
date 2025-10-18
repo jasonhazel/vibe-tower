@@ -71,7 +71,7 @@ class PlayerStateImpl {
     for (const key of Object.keys(this.tomes)) {
       const count = this.tomes[key] || 0;
       const upg = this.tomeUpgrades[key] || 0;
-      const step = (key === 'xp') ? 0.45 : multStep;
+      const step = (key === 'xp') ? 0.45 : (key === 'projectiles' ? 1 : multStep);
       // Total multiplier = base + (#tomes * per-tome increment) + (upgrades * step)
       next[key] = base[key] + count * inc[key] + upg * step;
     }
