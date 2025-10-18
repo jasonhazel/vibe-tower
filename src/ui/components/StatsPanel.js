@@ -1,5 +1,6 @@
 import { EventBus } from '../../state/EventBus.js';
 import { playerState } from '../../state/PlayerState.js';
+import { TomeCatalog } from '../../items/tomes/Tomes.js';
 
 export class StatsPanel {
 	constructor(scene) {
@@ -57,8 +58,30 @@ export class StatsPanel {
 			playerEntries.push(['Aura R', String(auraR)]);
 		}
 
-		// Groups: player first, then weapons with headers
+		// Groups: player first, then each owned tome, then weapons
 		const groups = [{ name: 'Player', entries: playerEntries }];
+		try {
+			const tomeState = playerState.getTomeState?.() || {};
+			const ownedTomeIds = Object.keys(tomeState).filter(id => (tomeState[id]?.level || 0) > 0);
+			ownedTomeIds.forEach((tid) => {
+				const t = TomeCatalog.find(x => x.id === tid);
+				if (!t) return;
+				const level = tomeState[tid]?.level || 0;
+				const upgrades = tomeState[tid]?.upgrades || 0;
+				const mods = t.getModifiers?.({ tomeLevel: level, upgradeCount: upgrades }) || [];
+				const entries = [ ['Level', String(level)], ['Upgrades', String(upgrades)] ];
+				for (const m of mods) {
+					if (!m || !m.stat) continue;
+					const statName = String(m.stat);
+					const type = m.type || 'mult';
+					const val = Number(m.value) || 0;
+					if (type === 'mult') entries.push([`${statName} mult`, `x${val.toFixed(2)}`]);
+					else if (type === 'add') entries.push([`${statName} add`, `+${val}`]);
+					else if (type === 'set') entries.push([`${statName} set`, `=${val}`]);
+				}
+				groups.push({ name: t.name, entries });
+			});
+		} catch (_) {}
 		try {
 			const play = this.scene.scene.get('PlayScene');
 			const weapons = play?.weaponManager?.weapons || [];
