@@ -165,6 +165,50 @@ export class HUDScene extends Phaser.Scene {
     // Stats panel (top-right)
     this.statsPanel = new StatsPanel(this);
     this._layoutStatsPanel();
+    // Stats toggle (top-right small button)
+    this._statsVisible = true;
+    const toggleW = 22, toggleH = 18;
+    this._statsToggleG = this.add.graphics();
+    const drawToggle = (bg = 0x263238, stroke = 0x8bc34a) => {
+      const w = this.scale.gameSize.width;
+      const margin = 12;
+      const x = w - this.statsPanel.width - margin - toggleW - 6;
+      const y = margin;
+      this._statsToggleG.clear();
+      this._statsToggleG.fillStyle(bg, 1);
+      this._statsToggleG.fillRect(x, y, toggleW, toggleH);
+      this._statsToggleG.lineStyle(1, stroke, 1);
+      this._statsToggleG.strokeRect(x, y, toggleW, toggleH);
+      // icon (simple bars)
+      this._statsToggleG.lineStyle(2, 0x90caf9, 1);
+      this._statsToggleG.beginPath();
+      this._statsToggleG.moveTo(x + 4, y + 5);
+      this._statsToggleG.lineTo(x + toggleW - 4, y + 5);
+      this._statsToggleG.moveTo(x + 4, y + 9);
+      this._statsToggleG.lineTo(x + toggleW - 4, y + 9);
+      this._statsToggleG.moveTo(x + 4, y + 13);
+      this._statsToggleG.lineTo(x + toggleW - 4, y + 13);
+      this._statsToggleG.strokePath();
+    };
+    drawToggle();
+    this._statsToggleZone = this.add.zone(0, 0, toggleW, toggleH).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+    const updateTogglePos = () => {
+      const w = this.scale.gameSize.width;
+      const margin = 12;
+      const x = w - this.statsPanel.width - margin - toggleW - 6;
+      const y = margin;
+      this._statsToggleZone.setPosition(x, y);
+      drawToggle();
+    };
+    updateTogglePos();
+    this._statsToggleZone.on('pointerover', () => drawToggle(0x2e3b43));
+    this._statsToggleZone.on('pointerout', () => drawToggle());
+    this._statsToggleZone.on('pointerup', () => {
+      this._statsVisible = !this._statsVisible;
+      this.statsPanel.setVisible(this._statsVisible);
+      this._layoutStatsPanel();
+      updateTogglePos();
+    });
     // Tooltip
     this.tooltip = new Tooltip(this);
     // initialize values

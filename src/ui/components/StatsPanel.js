@@ -31,6 +31,10 @@ export class StatsPanel {
 		this.container.setPosition(x, y);
 	}
 
+  setVisible(visible) {
+    this.container.setVisible(!!visible);
+  }
+
 	_draw(stats) {
 		// clear previous labels/values
 		this.labels.forEach((t) => t.destroy());
