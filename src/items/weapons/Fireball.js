@@ -1,6 +1,6 @@
 import { WeaponBase } from './WeaponBase.js';
-import { playerState } from '../state/PlayerState.js';
-import { gameConfig } from '../state/GameConfig.js';
+import { playerState } from '../../state/PlayerState.js';
+import { gameConfig } from '../../state/GameConfig.js';
 
 export class Fireball extends WeaponBase {
   constructor(scene, context, config = {}) {

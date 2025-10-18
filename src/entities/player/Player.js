@@ -1,5 +1,5 @@
-import { EventBus } from '../state/EventBus.js';
-import { playerState } from '../state/PlayerState.js';
+import { EventBus } from '../../state/EventBus.js';
+import { playerState } from '../../state/PlayerState.js';
 
 export class Player {
   constructor(scene, x, y, config = {}) {
