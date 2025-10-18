@@ -7,6 +7,7 @@ import { HUDScene } from './ui/HUDScene.js';
 import { gameConfig } from './state/GameConfig.js';
 import { playerState } from './state/PlayerState.js';
 import { Player } from './player/Player.js';
+import { PickupManager } from './pickups/PickupManager.js';
 
 let GAME_WIDTH = gameConfig.width;
 let GAME_HEIGHT = gameConfig.height;
@@ -25,6 +26,7 @@ class PlayScene extends Phaser.Scene {
     this.centerX = null;
     this.centerY = null;
     this._auraRef = null;
+    this.pickups = null;
   }
 
   create() {
@@ -50,14 +52,16 @@ class PlayScene extends Phaser.Scene {
     this.enemyManager = new EnemyManager(this, { centerX: cx, centerY: cy });
     this.enemies = this.enemyManager.group;
 
+    // Pickups
+    this.pickups = new PickupManager(this);
+
     // Weapons
     this.weaponManager = new WeaponManager(this, {
       enemiesGroup: this.enemies,
       centerX: cx,
       centerY: cy,
-      awardXp: (amount) => {
-        playerState.addXp(amount);
-      },
+      awardXp: (amount) => { playerState.addXp(amount); }, // kept for future use
+      spawnXp: (pos, amount) => { this.pickups.spawnXpAt(pos, amount); },
     });
     const aura = new Aura(this, this.weaponManager.context, {
         tickIntervalMs: gameConfig.aura.tickIntervalMs,
@@ -112,6 +116,10 @@ class PlayScene extends Phaser.Scene {
 
     // Update weapons
     this.weaponManager.update(delta);
+
+    // Update pickups (auto-collect near player)
+    const { x: px, y: py } = this.tower.getCenter();
+    this.pickups.update(px, py);
 
     // Tower contact damage tick
     this.contactTickTimer += delta;

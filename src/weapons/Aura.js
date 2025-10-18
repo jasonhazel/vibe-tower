@@ -28,7 +28,7 @@ export class Aura extends WeaponBase {
   }
 
   applyDamage() {
-    const { enemiesGroup, centerX, centerY, awardXp } = this.context;
+    const { enemiesGroup, centerX, centerY, awardXp, spawnXp } = this.context;
     const radiusSq = this.radius * this.radius;
     const toRemove = [];
     enemiesGroup.children.iterate((enemy) => {
@@ -43,8 +43,10 @@ export class Aura extends WeaponBase {
       }
     });
     toRemove.forEach((enemy) => {
+      const ex = enemy.x; const ey = enemy.y;
       enemy.destroy();
-      awardXp?.(1);
+      // spawn an XP crystal instead of instantly awarding XP
+      spawnXp?.({ x: ex, y: ey }, 1);
     });
   }
 
