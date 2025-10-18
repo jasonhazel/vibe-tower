@@ -6,6 +6,7 @@ export const TomeCatalog = [
   { id: 'tome-projectiles', name: 'Tome of Projectiles', key: 'projectiles', apply: () => playerState.addTome('projectiles') },
   { id: 'tome-attackSpeed', name: 'Tome of Attack Speed', key: 'attackSpeed', apply: () => playerState.addTome('attackSpeed') },
   { id: 'tome-xp', name: 'Tome of Learning', key: 'xp', apply: () => playerState.addTome('xp') },
+  { id: 'tome-pickup', name: 'Tome of Magnetism', key: 'pickup', apply: () => playerState.addTome('pickup') },
 ];
 
 export function tomeUpgradeOptions(ownedIds) {

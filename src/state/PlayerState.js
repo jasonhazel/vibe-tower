@@ -21,10 +21,11 @@ class PlayerStateImpl {
       projectiles: 1,
       attackSpeed: 1,
       xp: 1,
+      pickup: 1,
     };
     // Tome ownership and upgrade counts
-    this.tomes = { area: 0, damage: 0, projectiles: 0, attackSpeed: 0, xp: 0 };
-    this.tomeUpgrades = { area: 0, damage: 0, projectiles: 0, attackSpeed: 0, xp: 0 };
+    this.tomes = { area: 0, damage: 0, projectiles: 0, attackSpeed: 0, xp: 0, pickup: 0 };
+    this.tomeUpgrades = { area: 0, damage: 0, projectiles: 0, attackSpeed: 0, xp: 0, pickup: 0 };
   }
 
   getXp() { return this.xpTotal; }
@@ -61,8 +62,8 @@ class PlayerStateImpl {
 
   _recomputeStatsFromTomes() {
     // base stats
-    const base = { area: 1, damage: 1, projectiles: 1, attackSpeed: 1, xp: 1 };
-    const inc = { area: 0.2, damage: 0.2, projectiles: 1, attackSpeed: 0.2, xp: 0.2 };
+    const base = { area: 1, damage: 1, projectiles: 1, attackSpeed: 1, xp: 1, pickup: 1 };
+    const inc = { area: 0.2, damage: 0.2, projectiles: 1, attackSpeed: 0.2, xp: 0.2, pickup: 0.2 };
     const multStep = 0.2; // each upgrade increases impact by +20%
     const next = { ...base };
     for (const key of Object.keys(this.tomes)) {

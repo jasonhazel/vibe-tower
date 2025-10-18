@@ -32,6 +32,8 @@ export class StatsPanel {
       ['Damage', stats.damage?.toFixed?.(2) ?? String(stats.damage)],
       ['Projectiles', stats.projectiles?.toFixed?.(2) ?? String(stats.projectiles)],
       ['Atk Speed', stats.attackSpeed?.toFixed?.(2) ?? String(stats.attackSpeed)],
+      ['Pickup', stats.pickup?.toFixed?.(2) ?? String(stats.pickup)],
+      ['XP', stats.xp?.toFixed?.(2) ?? String(stats.xp)],
     ];
     this.title.setPosition(this.margin, this.margin);
     for (let i = 0; i < entries.length; i++) {

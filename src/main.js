@@ -96,7 +96,8 @@ class PlayScene extends Phaser.Scene {
       const areaMul = stats?.area || 1;
       const newAuraR = Math.floor(gameConfig.aura.radius * areaMul);
       this._auraRef?.setRadius(newAuraR);
-      const newPickupR = Math.floor(gameConfig.xpPickup.baseRadius * areaMul);
+      const pickupMul = (stats?.pickup || 1);
+      const newPickupR = Math.floor(gameConfig.xpPickup.baseRadius * pickupMul);
       playerState.setPickupRadius?.(newPickupR);
       this.pickupRadiusVisual?.setRadius?.(newPickupR);
     });
