@@ -13,7 +13,7 @@ export class LevelUpScene extends Phaser.Scene {
 
     const overlay = this.add.rectangle(0, 0, w, h, 0x000000, 0.6).setOrigin(0, 0);
     const panelW = Math.min(520, w - 40);
-    const panelH = 220;
+    const panelH = Math.min(420, h - 80);
     const x = (w - panelW) / 2;
     const y = (h - panelH) / 2;
     const panel = this.add.graphics();
@@ -22,11 +22,12 @@ export class LevelUpScene extends Phaser.Scene {
     panel.lineStyle(2, 0x8bc34a, 1);
     panel.strokeRoundedRect(x, y, panelW, panelH, 12);
 
-    this.add.text(w / 2, y + 18, 'Choose a Tome', { fontFamily: 'monospace', fontSize: '18px', color: '#ffffff' }).setOrigin(0.5);
+    this.add.text(w / 2, y + 18, 'Choose a Perk', { fontFamily: 'monospace', fontSize: '18px', color: '#ffffff' }).setOrigin(0.5);
 
     // Determine available tomes
     const availableTomes = TomeCatalog.filter((t) => !chosenIds.includes(t.id));
-    const tomeOpts = (chosenIds.length < maxTomes) ? availableTomes : [];
+    const tomeSlotsAvailable = (chosenIds.length < maxTomes);
+    const tomeOpts = tomeSlotsAvailable ? availableTomes : [];
     const upgOpts = tomeUpgradeOptions(chosenIds);
 
     // Weapons: new unlocks (if not owned) and upgrades for owned
@@ -36,14 +37,37 @@ export class LevelUpScene extends Phaser.Scene {
     const weaponUnlocks = unownedWeapons.map(w => ({ id: `w-${w.id}`, name: w.name, isWeapon: true, weaponId: w.id, apply: () => playerState.addWeaponById(w.id) }));
     const weaponUpgrades = WeaponCatalog.flatMap(w => w.getUpgradeOptions?.(playerState) || []);
 
-    const pool = [...tomeOpts, ...upgOpts, ...weaponUnlocks, ...weaponUpgrades];
-    const items = pool.sort(() => Math.random() - 0.5).slice(0, 3);
-    const colW = 150;
-    const startX = w / 2 - (items.length * colW + (items.length - 1) * 16) / 2;
+    // Build weighted pool so tomes are more likely when slots available
+    const weighted = [];
+    const pushWeighted = (arr, weight) => arr.forEach(it => weighted.push({ item: it, weight }));
+    pushWeighted(tomeOpts, tomeSlotsAvailable ? 3 : 1);
+    pushWeighted(upgOpts, 1);
+    pushWeighted(weaponUnlocks, 1);
+    pushWeighted(weaponUpgrades, 1);
+
+    // Sample up to 3 items without replacement using weights
+    const bag = [];
+    weighted.forEach((e, idx) => { for (let i = 0; i < Math.max(1, e.weight|0); i++) bag.push(idx); });
+    // shuffle bag
+    for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+    const picked = new Set();
+    const items = [];
+    for (let i = 0; i < bag.length && items.length < 3; i++) {
+      const idx = bag[i];
+      const it = weighted[idx]?.item;
+      if (!it) continue;
+      const key = it.id || it.name || String(idx);
+      if (picked.has(key)) continue;
+      picked.add(key);
+      items.push(it);
+    }
+
+    const bw = Math.min(360, panelW - 40); // equal width buttons, stacked
+    const bx = Math.floor(w / 2 - bw / 2);
     const by = y + 54;
 
     const makeBtn = (bx, by, label, onClick) => {
-      const bw = 150, bh = 40;
+      const bh = 44;
       const g = this.add.graphics();
       const draw = (bg = 0x263238, stroke = 0x8bc34a) => {
         g.clear();
@@ -53,7 +77,7 @@ export class LevelUpScene extends Phaser.Scene {
         g.strokeRoundedRect(bx, by, bw, bh, 8);
       };
       draw();
-      const txt = this.add.text(bx + bw / 2, by + bh / 2, label, { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' }).setOrigin(0.5);
+      const txt = this.add.text(bx + bw / 2, by + bh / 2, label, { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff', wordWrap: { width: bw - 24 } }).setOrigin(0.5);
       const zone = this.add.zone(bx, by, bw, bh).setOrigin(0, 0).setInteractive({ useHandCursor: true });
       zone.on('pointerover', () => draw(0x2e3b43));
       zone.on('pointerout', () => draw());
@@ -61,9 +85,9 @@ export class LevelUpScene extends Phaser.Scene {
       zone.on('pointerup', () => { draw(); onClick?.(); });
     };
 
-    // Tome options
+    // Stacked options
     items.forEach((t, i) => {
-      makeBtn(startX + i * (colW + 16), by, t.name, () => {
+      makeBtn(bx, by + i * 52, t.name, () => {
         t.apply(playerState);
         // Only add to tome slots if this is a new tome, not an upgrade
         if (!t.isUpgrade) {
@@ -77,7 +101,7 @@ export class LevelUpScene extends Phaser.Scene {
     });
 
     // Skip button
-    makeBtn(w / 2 - 75, y + panelH - 56, 'Skip', () => {
+    makeBtn(bx, Math.min(y + panelH - 56, by + items.length * 52 + 8), 'Skip', () => {
       this.game.events.emit('tome:skipped');
       this.scene.stop();
       this.scene.resume('PlayScene');
