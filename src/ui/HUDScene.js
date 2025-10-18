@@ -122,6 +122,14 @@ export class HUDScene extends Phaser.Scene {
 
     // Bottom HUD layout
     this._layoutBottomHud();
+    // Pull initial weapons/tomes state from PlayScene in case events fired early
+    try {
+      const play = this.scene.get('PlayScene');
+      if (play?.weaponManager) {
+        this._lastWeaponIds = play.weaponManager.getWeaponIds();
+        this.weaponsRow.update(this._lastWeaponIds);
+      }
+    } catch (_) {}
     // Stats panel (top-right)
     this.statsPanel = new StatsPanel(this);
     this._layoutStatsPanel();
