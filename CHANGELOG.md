@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.17] - 2025-10-19
+## [0.1.18] - 2025-10-19
 ### Added
-- Docs: standards now require passive range rings for weapons.
+- Stats panel: Chain Lightning stats (cd, dmg, jumps, ranges).
+- Docs: standards now include adding stats panel entries for new weapons.
 
 ## [0.1.14] - 2025-10-19
 ### Added

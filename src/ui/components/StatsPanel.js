@@ -141,6 +141,17 @@ export class StatsPanel {
 							['Slam grow', `${Math.round(rp.growthSpeed ?? w.growthSpeed)}/s`],
 						],
 					});
+				} else if (id === 'chainLightning') {
+					groups.push({
+						name: 'Chain Lightning',
+						entries: [
+							['CL cd', `${rp.cooldownMs ?? w.cooldownMs}ms`],
+							['CL dmg', `${rp.damage ?? w.baseDamage}`],
+							['CL jumps', `${rp.maxJumps ?? w.maxJumps}`],
+							['CL range', `${rp.range ?? w.range}`],
+							['CL chainR', `${rp.chainRange ?? w.chainRange}`],
+						],
+					});
 				}
 			}
 		} catch (_) {}
@@ -150,7 +161,7 @@ export class StatsPanel {
 		let tomeEntries = [];
 		for (let gi = 1; gi < groups.length; gi++) {
 			const g = groups[gi];
-			if (g.name === 'Aura' || g.name === 'Fireball' || g.name === 'Slam') {
+			if (g.name === 'Aura' || g.name === 'Fireball' || g.name === 'Slam' || g.name === 'Chain Lightning') {
 				weaponEntries.push([`— ${g.name} —`, '']);
 				for (const e of g.entries) weaponEntries.push(e);
 			} else if (g.name !== 'Player') {
