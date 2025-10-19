@@ -7,13 +7,12 @@ export class Blades extends WeaponBase {
     super(scene, context);
     this.id = 'blades';
     this.baseDamage = config.baseDamage ?? gameConfig.blades.baseDamage;
-    this.cooldownMs = config.baseCooldownMs ?? gameConfig.blades.baseCooldownMs;
     this.orbitRadius = config.orbitRadius ?? gameConfig.blades.orbitRadius;
     this.rotationSpeed = config.rotationSpeed ?? gameConfig.blades.rotationSpeed; // deg/sec
     this.bladeLength = config.bladeLength ?? gameConfig.blades.bladeLength;
     this.bladeHitRadius = config.bladeHitRadius ?? gameConfig.blades.bladeHitRadius;
     this.baseBladeCount = config.bladeCount ?? gameConfig.blades.bladeCount;
-    this.timer = 0;
+    // No damage cooldown; damage is applied on contact each frame
     this.blades = [];
     // Visual range ring for orbit radius
     this.rangeGfx = scene.add.graphics();
@@ -38,7 +37,6 @@ export class Blades extends WeaponBase {
     const mk = (key, label) => ({ id: `wupg-${this.id}-${key}`, name: `${this.constructor.name} ${label}`, short: label, isUpgrade: true, isWeapon: true, weaponId: this.id, upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.(this.id, key) });
     return [
       mk('damage', 'Damage+'),
-      mk('cooldown', 'Faster Ticks'),
       mk('radius', 'Orbit Radius+'),
       mk('speed', 'Rotation Speed+'),
       mk('projectiles', 'More Blades'),
@@ -50,16 +48,14 @@ export class Blades extends WeaponBase {
     const ws = ps?.getWeaponState?.()?.[this.id] || { upgrades: {} };
     const up = ws.upgrades || {};
     const dmg = Math.max(1, Math.floor(this.baseDamage * (stats.damage || 1) * (1 + 0.15 * (up.damage || 0))));
-    const cd = Math.max(60, Math.floor((this.cooldownMs * Math.pow(0.9, (up.cooldown || 0))) / Math.max(0.1, stats.attackSpeed || 1)));
     const radius = Math.floor(this.orbitRadius * (stats.area || 1) * (1 + 0.10 * (up.radius || 0)));
-    const rotSpeed = this.rotationSpeed * (1 + 0.10 * (up.speed || 0));
+    const rotSpeed = this.rotationSpeed * Math.max(0.1, stats.attackSpeed || 1) * (1 + 0.10 * (up.speed || 0));
     const count = Math.max(1, Math.floor((this.baseBladeCount || 1) + (up.projectiles || 0) + Math.max(0, Math.floor((stats.projectiles || 1) - 1))));
-    return { damage: dmg, cooldownMs: cd, radius, rotationSpeed: rotSpeed, bladeCount: count, bladeHitRadius: this.bladeHitRadius, bladeLength: this.bladeLength };
+    return { damage: dmg, radius, rotationSpeed: rotSpeed, bladeCount: count, bladeHitRadius: this.bladeHitRadius, bladeLength: this.bladeLength };
   }
 
   update(deltaMs) {
     const rp = this.getRuntimeParams(playerState);
-    this.timer += deltaMs;
     // Ensure correct number of blade sprites
     if (this.blades.length !== rp.bladeCount) {
       this.blades.forEach(b => b.g?.destroy());
@@ -82,10 +78,8 @@ export class Blades extends WeaponBase {
       this._drawBlade(b.g, this.bladeLength);
     }
     // Apply contact damage periodically
-    if (this.timer >= rp.cooldownMs) {
-      this.timer = 0;
-      this._applyDamage(rp);
-    }
+    // Apply damage continuously on contact (no cooldown)
+    this._applyDamage(rp);
   }
 
   _applyDamage(rp) {

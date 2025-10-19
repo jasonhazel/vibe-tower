@@ -21,7 +21,6 @@ export const WeaponCatalog = [
       const mk = (key, label) => ({ id: `wupg-blades-${key}`, name: `Blades ${label}`, short: label, isUpgrade: true, isWeapon: true, weaponId: 'blades', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('blades', key) });
       return [
         mk('damage', 'Damage+'),
-        mk('cooldown', 'Faster Ticks'),
         mk('radius', 'Orbit Radius+'),
         mk('speed', 'Rotation Speed+'),
         mk('projectiles', 'More Blades'),

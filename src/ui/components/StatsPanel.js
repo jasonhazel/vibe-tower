@@ -168,11 +168,10 @@ export class StatsPanel {
 					groups.push({
 						name: 'Blades',
 						entries: [
-							['Blade tick', `${rp.cooldownMs ?? w.cooldownMs}ms`],
+							['Blade rot', `${Math.round(rp.rotationSpeed ?? w.rotationSpeed)}`],
 							['Blade dmg', `${rp.damage ?? w.baseDamage}`],
 							['Blade cnt', `${rp.bladeCount ?? 1}`],
 							['Blade rad', `${rp.radius ?? w.orbitRadius}`],
-							['Blade rot', `${Math.round(rp.rotationSpeed ?? w.rotationSpeed)}`],
 						],
 					});
 				}
