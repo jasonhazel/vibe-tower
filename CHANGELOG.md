@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.35] - 2025-10-19
+## [0.1.36] - 2025-10-19
 ### Added
 - New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.
 ### Changed
@@ -32,6 +32,7 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Weapon range rings now only display when the cheat menu is active (`?cheat=true`).
 ### Fixed
 - Aura ring also respects the cheat-only visibility toggle.
+ - XP pickup radius ring now also respects the cheat-only visibility toggle.
 
 ## [0.1.19] - 2025-10-19
 ### Added

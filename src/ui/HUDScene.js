@@ -272,6 +272,10 @@ export class HUDScene extends Phaser.Scene {
               try { if (w.getId?.() === 'aura' && w.graphics) w.graphics.visible = !!visible; } catch (_) {}
             });
           }
+          // XP pickup radius visual
+          if (play?.pickupRadiusVisual?.graphics) {
+            play.pickupRadiusVisual.graphics.visible = !!visible;
+          }
         } catch (_) {}
       };
       setRingsVisible(isCheat);
