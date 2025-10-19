@@ -15,14 +15,14 @@ export const gameConfig = {
   fireball: {
     baseDamage: 10,
     projectileSpeed: 260,
-    range: 160, // base targeting range
+    range: 120, // base targeting range
     baseCooldownMs: 1500,
     radius: 4,
   },
   chainLightning: {
-    baseDamage: 14,
-    baseCooldownMs: 1800,
-    range: 100, // max distance from player to first target
+    baseDamage: 10,
+    baseCooldownMs: 2000,
+    range: 120, // max distance from player to first target
     chainRange: 50, // max distance between chained targets
     maxJumps: 0, // additional targets after the first
     falloff: 0.8, // damage multiplier per jump
