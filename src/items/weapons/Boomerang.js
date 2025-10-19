@@ -91,22 +91,17 @@ export class Boomerang extends WeaponBase {
     const { centerX, centerY } = this.context;
     // choose targets by sampling enemies in range; if none, throw in random direction
     const enemies = this._collectEnemiesInRange(centerX, centerY, rp.range);
+    if (enemies.length === 0) return; // no valid targets: do not throw
     const throws = Math.max(1, rp.projectiles);
     for (let i = 0; i < throws; i++) {
       let targetX, targetY;
-      if (enemies.length > 0) {
-        const e = enemies[Math.floor(Math.random() * enemies.length)];
-        // Aim in the direction of the chosen enemy but extend to exact max range
-        const dx = e.x - centerX; const dy = e.y - centerY;
-        const len = Math.hypot(dx, dy) || 1;
-        const ux = dx / len; const uy = dy / len;
-        targetX = centerX + ux * rp.range;
-        targetY = centerY + uy * rp.range;
-      } else {
-        const ang = Math.random() * Math.PI * 2;
-        targetX = centerX + Math.cos(ang) * rp.range;
-        targetY = centerY + Math.sin(ang) * rp.range;
-      }
+      const e = enemies[Math.floor(Math.random() * enemies.length)];
+      // Aim in the direction of the chosen enemy but extend to exact max range
+      const dx = e.x - centerX; const dy = e.y - centerY;
+      const len = Math.hypot(dx, dy) || 1;
+      const ux = dx / len; const uy = dy / len;
+      targetX = centerX + ux * rp.range;
+      targetY = centerY + uy * rp.range;
       this._spawnBoomerang(centerX, centerY, targetX, targetY, rp);
     }
   }
