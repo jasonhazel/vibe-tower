@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.13] - 2025-10-19
+### Added
+- New weapon: Chain Lightning (auto-targets nearest enemy, chains to nearby foes with damage falloff; upgrades include Damage, Cooldown, Range, Chain Range, More Chains).
+
 ## [0.1.12] - 2025-10-19
 ### Changed
 - Share image footer now shows current app version.

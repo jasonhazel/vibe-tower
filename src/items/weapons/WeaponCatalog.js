@@ -13,6 +13,22 @@ export const WeaponCatalog = [
     },
   },
   {
+    id: 'chainLightning',
+    name: 'Chain Lightning',
+    getUpgradeOptions(ps) {
+      const s = ps?.getWeaponState?.()?.['chainLightning'];
+      if (!s || s.level <= 0) return [];
+      const mk = (key, label) => ({ id: `wupg-chainLightning-${key}`, name: `Chain Lightning ${label}`, short: label, isUpgrade: true, isWeapon: true, weaponId: 'chainLightning', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('chainLightning', key) });
+      return [
+        mk('damage', 'Damage+'),
+        mk('cooldown', 'Faster Cooldown'),
+        mk('range', 'Range+'),
+        mk('radius', 'Chain Range+'),
+        mk('projectiles', 'More Chains'),
+      ];
+    },
+  },
+  {
     id: 'fireball',
     name: 'Fireball',
     getUpgradeOptions(ps) {
