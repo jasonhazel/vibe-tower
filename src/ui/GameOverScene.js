@@ -44,7 +44,7 @@ export class GameOverScene extends Phaser.Scene {
     // Restart button
     const btnW = 140;
     const btnH = 36;
-    const btnX = w / 2 - btnW / 2;
+    const btnX = w / 2 - btnW - 8;
     const btnY = panelY + panelH - 54;
     const btn = this.add.graphics();
     const drawBtn = (bg = 0x263238, stroke = 0x90caf9) => {
@@ -55,7 +55,7 @@ export class GameOverScene extends Phaser.Scene {
       btn.strokeRoundedRect(btnX, btnY, btnW, btnH, 8);
     };
     drawBtn();
-    const label = this.add.text(w / 2, btnY + btnH / 2, 'Restart', { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' }).setOrigin(0.5);
+    const label = this.add.text(btnX + btnW / 2, btnY + btnH / 2, 'Restart', { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' }).setOrigin(0.5);
 
     const hit = this.add.zone(btnX, btnY, btnW, btnH).setOrigin(0, 0).setInteractive({ useHandCursor: true });
     hit.on('pointerover', () => drawBtn(0x2e3b43, 0xace0ff));
@@ -65,6 +65,86 @@ export class GameOverScene extends Phaser.Scene {
       drawBtn();
       this.game.events.emit('game:restart');
     });
+
+    // Share button
+    const shareW = 140;
+    const shareH = 36;
+    const shareX = w / 2 + 8;
+    const shareY = btnY;
+    const shareBtn = this.add.graphics();
+    const drawShare = (bg = 0x263238, stroke = 0x90caf9) => {
+      shareBtn.clear();
+      shareBtn.fillStyle(bg, 1);
+      shareBtn.fillRoundedRect(shareX, shareY, shareW, shareH, 8);
+      shareBtn.lineStyle(2, stroke, 1);
+      shareBtn.strokeRoundedRect(shareX, shareY, shareW, shareH, 8);
+    };
+    drawShare();
+    const shareLabel = this.add.text(shareX + shareW / 2, shareY + shareH / 2, 'Share', { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff' }).setOrigin(0.5);
+    const shareZone = this.add.zone(shareX, shareY, shareW, shareH).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+    shareZone.on('pointerover', () => drawShare(0x2e3b43, 0xace0ff));
+    shareZone.on('pointerout', () => drawShare());
+    shareZone.on('pointerdown', () => drawShare(0x1b252b, 0x6fb7ff));
+    shareZone.on('pointerup', async () => {
+      drawShare();
+      await this._shareScoreCard({ runMs, xpTotal, level });
+    });
+  }
+
+  async _shareScoreCard({ runMs, xpTotal, level }) {
+    try {
+      const w = 600;
+      const h = 315; // 2:1-ish card
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      // Background
+      ctx.fillStyle = '#0f1418';
+      ctx.fillRect(0, 0, w, h);
+      // Border
+      ctx.strokeStyle = '#90caf9';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(2, 2, w - 4, h - 4);
+      // Title
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 28px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Vibe Tower - Run Summary', w / 2, 56);
+      // Stats
+      const totalSeconds = Math.floor(runMs / 1000);
+      const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const ss = String(totalSeconds % 60).padStart(2, '0');
+      ctx.font = '18px monospace';
+      ctx.textAlign = 'left';
+      const left = 64;
+      let y = 110;
+      const dy = 30;
+      ctx.fillStyle = '#e0e0e0';
+      ctx.fillText(`Time: ${mm}:${ss}`, left, y); y += dy;
+      ctx.fillText(`Level: ${level}`, left, y); y += dy;
+      ctx.fillText(`XP: ${xpTotal}`, left, y); y += dy;
+      // Footer
+      ctx.fillStyle = '#90caf9';
+      ctx.font = '14px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText('vibes.tower', w - 16, h - 18);
+
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('toBlob failed');
+      const item = new ClipboardItem({ 'image/png': blob });
+      await navigator.clipboard.write([item]);
+      // Optional toast
+      try { this._toast?.destroy?.(); } catch (_) {}
+      const t = this.add.text(this.scale.gameSize.width / 2, this.scale.gameSize.height - 40, 'Copied image to clipboard!', { fontFamily: 'monospace', fontSize: '14px', color: '#a5d6a7' }).setOrigin(0.5);
+      this._toast = t;
+      this.time.delayedCall(1500, () => t.destroy());
+    } catch (err) {
+      console.warn('Share failed', err);
+      try { this._toast?.destroy?.(); } catch (_) {}
+      const t = this.add.text(this.scale.gameSize.width / 2, this.scale.gameSize.height - 40, 'Share failed (clipboard blocked?)', { fontFamily: 'monospace', fontSize: '14px', color: '#ef9a9a' }).setOrigin(0.5);
+      this._toast = t;
+      this.time.delayedCall(1500, () => t.destroy());
+    }
   }
 }
 
