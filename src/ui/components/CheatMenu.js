@@ -78,6 +78,31 @@ export class CheatMenu {
 			y += bh + 6;
 		});
 
+		// Weapon unlock buttons (for testing)
+		{
+			const ws = playerState.getWeaponState?.() || {};
+			const ownedWeapons = Object.keys(ws).filter(id => (ws[id]?.level || 0) > 0);
+			const allWeapons = [
+				{ id: 'aura', name: 'Aura' },
+				{ id: 'fireball', name: 'Fireball' },
+				{ id: 'slam', name: 'Slam' },
+				{ id: 'chainLightning', name: 'Chain Lightning' },
+			];
+			const unownedWeapons = allWeapons.filter(w => !ownedWeapons.includes(w.id));
+			if (unownedWeapons.length > 0) {
+				// small header spacer
+				y += 6;
+				unownedWeapons.forEach((w) => {
+					makeBtn(`Add ${w.name}`, margin, y, () => {
+						// emit same event used by level up flow so PlayScene wires instances
+						this.scene.game.events.emit('weapon:add', w.id);
+						this.render();
+					});
+					y += bh + 6;
+				});
+			}
+		}
+
 		// Level up button below
 		makeBtn('Level Up', margin, y + 8, () => playerState.levelUpOnceDebug?.(), { bg: 0x3a3a3a, hover: 0x414b41, down: 0x2b312b, stroke: 0x8bc34a });
 		// XP grant buttons
