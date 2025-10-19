@@ -14,6 +14,9 @@ export class Slam extends WeaponBase {
     this.ring = null; // graphics ring
     this.active = false;
     this.currentRadius = 0;
+    // passive range ring for max radius
+    this.rangeGfx = scene.add.graphics();
+    this._redrawRange();
   }
 
   getId() { return this.id; }
@@ -127,10 +130,20 @@ export class Slam extends WeaponBase {
 
   destroy() {
     this.ring?.destroy();
+    this.rangeGfx?.destroy();
   }
 
   setCenter(x, y) {
     // visuals follow center automatically on redraw
+    this._redrawRange();
+  }
+
+  _redrawRange() {
+    const { centerX, centerY } = this.context;
+    const rp = this.getRuntimeParams(playerState);
+    this.rangeGfx.clear();
+    this.rangeGfx.lineStyle(2, 0xffeb3b, 0.5);
+    this.rangeGfx.strokeCircle(centerX, centerY, rp.maxRadius);
   }
 }
 

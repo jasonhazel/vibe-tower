@@ -13,6 +13,9 @@ export class ChainLightning extends WeaponBase {
     this.maxJumps = config.maxJumps ?? gameConfig.chainLightning.maxJumps;
     this.falloff = config.falloff ?? gameConfig.chainLightning.falloff;
     this.timer = 0;
+    // Visual: range ring showing initial target acquisition radius
+    this.rangeGfx = scene.add.graphics();
+    this._redrawRange();
   }
 
   getId() { return this.id; }
@@ -130,6 +133,14 @@ export class ChainLightning extends WeaponBase {
     this.scene.tweens.add({ targets: g, alpha: 0, duration: 120, onComplete: () => g.destroy() });
   }
 
+  _redrawRange() {
+    const { centerX, centerY } = this.context;
+    this.rangeGfx.clear();
+    this.rangeGfx.lineStyle(2, 0x90caf9, 0.5);
+    const rp = this.getRuntimeParams(playerState);
+    this.rangeGfx.strokeCircle(centerX, centerY, rp.range);
+  }
+
   _findNearestEnemy(x, y, maxRange, excludeSet) {
     const r2 = maxRange * maxRange;
     let best = null; let bestD2 = Infinity;
@@ -143,6 +154,11 @@ export class ChainLightning extends WeaponBase {
 
   setCenter(x, y) {
     this.context.centerX = x; this.context.centerY = y;
+    this._redrawRange();
+  }
+
+  destroy() {
+    this.rangeGfx?.destroy();
   }
 }
 
