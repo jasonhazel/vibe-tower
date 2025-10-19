@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.45] - 2025-10-19
+### Fixed
+- XP multi-level pickups: XP bar now drops to the correct remainder between sequential level-up dialogs using a per-level progress queue.
+
+### Added
+- Cheat menu: Spawn XP Diamond button to drop a large XP orb at a random position for testing multi-level collection.
+- Cheat menu: Pause/Resume button to pause/resume the PlayScene while keeping HUD/cheat controls active.
+
+## [0.1.44] - 2025-10-19
+### Added
+- Loot system: enemies can drop loot instead of XP (weighted pool in `gameConfig.loot`).
+- New loot: Healthpack that heals on pickup. Spawned via loot roll or Cheat Menu.
+- PickupManager: supports multiple pickup types, heal text, save/load type.
+ - New loot: Magnet that vacuums all XP pickups on the field when collected.
+
+### Changed
+- Centralized drop decision so weapons and tower contact deaths use loot-or-XP.
+
+### Testing
+- Cheat menu: Spawn Healthpack button for quick validation.
+ - Cheat menu: Heal +5 HP and Damage 5 HP buttons for testing health changes.
+
+### Changed
+- Healthpack drop chance reduced to 5% (`gameConfig.loot.dropChance = 0.05`).
+- Global loot drop chance reduced to 1% (`gameConfig.loot.dropChance = 0.01`).
+- Magnet icon updated to classic U-shape with red/blue poles.
+
+---
+
 ## [0.1.38] - 2025-10-19
 ### Added
 - New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.

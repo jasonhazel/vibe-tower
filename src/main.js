@@ -124,7 +124,7 @@ class PlayScene extends Phaser.Scene {
       centerX: cx,
       centerY: cy,
       awardXp: (amount) => { playerState.addXp(amount); }, // kept for future use
-      spawnXp: (pos, amount) => { this.pickups.spawnXpAt(pos, amount); },
+      spawnXp: (pos, amount) => { this._spawnLootOrXp(pos, amount); },
     });
     // Seed starting weapons if owned in state
     const ws = playerState.getWeaponState();
@@ -414,13 +414,13 @@ class PlayScene extends Phaser.Scene {
         const hp = Math.max(0, Math.floor(enemy.getData('hp') ?? gameConfig.enemy.baseHp));
         // Deal damage equal to enemy's remaining HP
         if (hp > 0) this.tower.takeDamage(hp);
-        // Drop XP crystal on contact death
+        // Drop loot or XP on contact death
         const ex = enemy.x; const ey = enemy.y; const er = enemy.getData('radius') || 10;
         const ang = Math.random() * Math.PI * 2;
         const r = Math.random() * er;
         const px2 = ex + Math.cos(ang) * r;
         const py2 = ey + Math.sin(ang) * r;
-        this.pickups.spawnXpAt({ x: px2, y: py2 }, 1);
+        this._spawnLootOrXp({ x: px2, y: py2 }, 1);
         enemy.destroy();
       }
     }
@@ -528,6 +528,38 @@ class PlayScene extends Phaser.Scene {
       if (distSq <= thresholdSq) touching.push(enemy);
     });
     return touching;
+  }
+
+  _spawnLootOrXp(pos, xpAmount = 1) {
+    // Decide whether to drop loot from weighted pool or XP
+    const lootCfg = gameConfig.loot || { dropChance: 0, pool: [] };
+    const roll = Math.random();
+    if (roll < (lootCfg.dropChance || 0)) {
+      // weighted choice
+      const pool = Array.isArray(lootCfg.pool) ? lootCfg.pool : [];
+      const totalWeight = pool.reduce((s, it) => s + (it.weight || 1), 0) || 0;
+      let pick = null;
+      if (totalWeight > 0) {
+        let t = Math.random() * totalWeight;
+        for (const it of pool) {
+          t -= (it.weight || 1);
+          if (t <= 0) { pick = it.id; break; }
+        }
+        if (!pick && pool.length > 0) pick = pool[pool.length - 1].id;
+      }
+      if (pick === 'healthpack') {
+        try { console.log('[loot] drop', { type: 'healthpack', x: Math.floor(pos.x), y: Math.floor(pos.y) }); } catch (_) {}
+        const heal = Math.max(1, Math.floor(gameConfig?.loot?.healthpack?.healAmount || 10));
+        this.pickups.spawnHealthAt(pos, heal);
+        return;
+      } else if (pick === 'magnet') {
+        try { console.log('[loot] drop', { type: 'magnet', x: Math.floor(pos.x), y: Math.floor(pos.y) }); } catch (_) {}
+        this.pickups.spawnMagnetAt(pos);
+        return;
+      }
+    }
+    // fallback: XP
+    this.pickups.spawnXpAt(pos, xpAmount);
   }
 }
 

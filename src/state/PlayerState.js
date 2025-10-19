@@ -34,6 +34,9 @@ class PlayerStateImpl {
     // Multi-level queue
     this.pendingLevelUps = 0;
     this._queuedRemainder = 0;
+    // New: per-level progress queue; after consuming one level-up, set xpCurrent
+    // to the queued progress for the next level. Back-compat kept via _queuedRemainder.
+    this._queuedProgresses = [];
   }
 
   getXp() { return this.xpTotal; }
@@ -164,20 +167,28 @@ class PlayerStateImpl {
     // Available XP toward current and future levels (do not commit remainder yet)
     let available = this.xpCurrent + grant;
     let anyLeveled = false;
-    // Process potentially multiple levels and queue them
+    // Ensure queue exists
+    if (!Array.isArray(this._queuedProgresses)) this._queuedProgresses = [];
+    // Process potentially multiple levels and queue per-level progress
     while (available >= this.xpNeeded) {
+      // Spend threshold for current level
       available -= this.xpNeeded;
+      // Level up
       this.level += 1;
-      // increase requirement by 1.5x each level (ceil to integer)
+      // Compute next requirement and queue the progress for the next level
       this.xpNeeded = Math.ceil(this.xpNeeded * 1.5);
+      // Progress toward the next level after this one is consumed
+      const nextProgress = Math.max(0, Math.min(this.xpNeeded, Math.floor(available)));
+      this._queuedProgresses.push(nextProgress);
       this.pendingLevelUps = (this.pendingLevelUps || 0) + 1;
       anyLeveled = true;
       // Notify level change immediately (HUD badge)
       EventBus.emit('player:level', this.level);
       // For UI, keep bar visually full while there are pending level-ups
       this.xpCurrent = this.xpNeeded; // display full bar for the current threshold
+      // If we still have enough to cross again, the next loop iteration will handle it
     }
-    // After processing all queued levels, store final remainder for when the queue is consumed
+    // Back-compat: also store the final remainder
     this._queuedRemainder = Math.max(0, Math.floor(available));
     if (!anyLeveled) {
       // No new level: just update current progress
@@ -212,12 +223,17 @@ class PlayerStateImpl {
   consumePendingLevelUp() {
     if (!this.pendingLevelUps || this.pendingLevelUps <= 0) return;
     this.pendingLevelUps -= 1;
-    if (this.pendingLevelUps <= 0) {
-      // Apply final remainder to the current level's progress
+    // Prefer new queue; fall back to legacy behavior
+    if (Array.isArray(this._queuedProgresses) && this._queuedProgresses.length > 0) {
+      const next = this._queuedProgresses.shift();
+      // Set current progress to the queued value for this next level
+      this.xpCurrent = Math.max(0, Math.min(this.xpNeeded, Math.floor(Number(next) || 0)));
+    } else if (this.pendingLevelUps <= 0) {
+      // Legacy: apply final remainder when queue exhausted
       this.xpCurrent = Math.max(0, Math.floor(this._queuedRemainder || 0));
       this._queuedRemainder = 0;
     } else {
-      // Keep bar full for subsequent queued dialogs
+      // No queued progress available but more pending remain: keep full bar
       this.xpCurrent = this.xpNeeded;
     }
     EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
@@ -282,6 +298,7 @@ class PlayerStateImpl {
       xpOverflow: this.xpOverflow,
       pendingLevelUps: this.pendingLevelUps,
       queuedRemainder: this._queuedRemainder,
+      queuedProgresses: Array.isArray(this._queuedProgresses) ? this._queuedProgresses.slice() : [],
       healthCurrent: this.healthCurrent,
       healthMax: this.healthMax,
       shield: this.shield,
@@ -313,6 +330,23 @@ class PlayerStateImpl {
     this._pendingLevelXpRemainder = Number(saved.pendingLevelXpRemainder || 0);
     this.pendingLevelUps = Number(saved.pendingLevelUps || 0);
     this._queuedRemainder = Number(saved.queuedRemainder || 0);
+    // New queue; build from saved if available, else approximate from legacy remainder
+    const qp = Array.isArray(saved.queuedProgresses) ? saved.queuedProgresses.filter((n) => typeof n === 'number') : null;
+    if (qp && qp.length > 0) {
+      this._queuedProgresses = qp.slice();
+    } else {
+      this._queuedProgresses = [];
+      // If legacy remainder exists and we have pending levels, approximate prior behavior:
+      // keep bar full until the last pending, then drop to remainder
+      const pend = this.pendingLevelUps;
+      if (pend > 0) {
+        const full = Math.max(0, Math.floor(this.xpNeeded));
+        for (let i = 1; i <= pend; i++) {
+          if (i < pend) this._queuedProgresses.push(full);
+          else this._queuedProgresses.push(Math.max(0, Math.min(full, Math.floor(this._queuedRemainder || 0))));
+        }
+      }
+    }
   }
 }
 

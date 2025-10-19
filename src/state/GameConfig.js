@@ -10,19 +10,19 @@ export const gameConfig = {
   aura: {
     tickIntervalMs: 250,
     damagePerTick: 5,
-    radius: 80,
+    radius: 60,
   },
   fireball: {
     baseDamage: 10,
     projectileSpeed: 260,
-    range: 80, // base targeting range
+    range: 100, // base targeting range
     baseCooldownMs: 1500,
     radius: 4,
   },
   chainLightning: {
     baseDamage: 10,
     baseCooldownMs: 2000,
-    range: 82, // max distance from player to first target
+    range: 90, // max distance from player to first target
     chainRange: 50, // max distance between chained targets
     maxJumps: 0, // additional targets after the first
     falloff: 0.8, // damage multiplier per jump
@@ -30,7 +30,7 @@ export const gameConfig = {
   boomerang: {
     baseDamage: 12,
     baseCooldownMs: 1300,
-    range: 100,
+    range: 80,
     projectileSpeed: 220,
     radius: 6,
     pierce: 2,
@@ -38,7 +38,7 @@ export const gameConfig = {
   blades: {
     baseDamage: 10,
     baseCooldownMs: 250,
-    orbitRadius: 83,
+    orbitRadius: 80,
     rotationSpeed: 180,
     bladeLength: 16,
     bladeHitRadius: 8,
@@ -52,7 +52,24 @@ export const gameConfig = {
   },
   xpPickup: {
     // Starting pickup radius for XP crystals; smaller than aura radius (100)
-    baseRadius: 70,
+    baseRadius: 50,
+  },
+  // Loot system config
+  loot: {
+    // Chance that a defeated enemy drops loot instead of XP (0..1)
+    dropChance: 0.01,
+    // Weighted pool of loot items
+    pool: [
+      { id: 'healthpack', weight: 1 },
+      { id: 'magnet', weight: 1 },
+    ],
+    // Item-specific configs
+    healthpack: {
+      healAmount: 20,
+    },
+    magnet: {
+      // currently no params; reserved for future tuning
+    },
   },
   enemy: {
     baseSpeed: 40,
