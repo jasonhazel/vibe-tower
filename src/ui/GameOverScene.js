@@ -94,7 +94,7 @@ export class GameOverScene extends Phaser.Scene {
   async _shareScoreCard({ runMs, xpTotal, level }) {
     try {
       const w = 720;
-      const h = 420; // tighten height
+      const h = 360; // further tighten height
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
@@ -153,7 +153,7 @@ export class GameOverScene extends Phaser.Scene {
       const ownedTomes = Object.keys(ts).filter(id => (ts[id]?.level || 0) > 0);
 
       // Section titles
-      const iconsTop = 240;
+      const iconsTop = 200;
       ctx.fillStyle = '#b0bec5';
       ctx.font = '16px monospace';
       ctx.textAlign = 'left';
@@ -196,7 +196,7 @@ export class GameOverScene extends Phaser.Scene {
       // Layout icons in rows
       const iconSize = 28;
       const gap = 14;
-      const startWY = iconsTop + 26;
+      const startWY = iconsTop + 24;
       let wx = left + iconSize / 2;
       let wy = startWY;
       ownedWeapons.forEach((id, idx) => {
@@ -205,7 +205,7 @@ export class GameOverScene extends Phaser.Scene {
         if ((idx + 1) % 6 === 0) { wx = left + iconSize / 2; wy += iconSize + gap; }
       });
 
-      const startTY = iconsTop + 26;
+      const startTY = iconsTop + 24;
       let tx = colX + iconSize / 2;
       let ty = startTY;
       ownedTomes.forEach((id, idx) => {

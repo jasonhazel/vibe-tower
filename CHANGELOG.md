@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.10] - 2025-10-19
+### Changed
+- Share image height tightened further; icons shifted up to reduce bottom empty space.
+
 ## [0.1.9] - 2025-10-19
 ### Changed
 - Share image height reduced to better fit content; layout tightened.
