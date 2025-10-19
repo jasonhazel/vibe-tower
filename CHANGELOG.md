@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.11] - 2025-10-19
+### Changed
+- Share image layout: restored icons below stats, reduced overall height to 330 to remove extra bottom padding without overlapping.
+
 ## [0.1.10] - 2025-10-19
 ### Changed
 - Share image height tightened further; icons shifted up to reduce bottom empty space.
