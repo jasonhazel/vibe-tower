@@ -72,4 +72,49 @@ This document describes how XP is earned, how level-ups are triggered, and how r
 - Starting `xpNeeded` is 10; growth is `ceil(needed * 1.5)` per level.
 - XP multiplier is derived from tomes and upgrades via the stat engine and can affect both grant size and overflow behavior.
 
+## Proposed: Sequential Multi-Level-Up Dialogs
+
+Goal: When a single XP grant would cover multiple levels, present the Level Up dialog once per level, in sequence, without requiring additional XP grants.
+
+### High-Level Behavior
+- Collapse large XP grants into a queue of pending level-ups.
+- For each pending level-up:
+  1) Open the Level Up dialog
+  2) Apply the chosen perk/unlock
+  3) Advance to the next pending level until exhausted
+- The XP bar should animate to full for each level, then drop to the correct remainder for the next level before opening the next dialog.
+
+### State Additions (PlayerState)
+- `pendingLevelUps: number` — counts how many level-ups remain to process.
+- Adjust `addXp(amount)` to iterate while `xpCurrent >= xpNeeded`:
+  - Increment `level`
+  - Compute new `xpNeeded = ceil(xpNeeded * 1.5)`
+  - Increment `pendingLevelUps`
+  - Set `xpCurrent` to `xpNeeded` temporarily for visual full-bar state; compute and carry forward the `remainder` for further loops
+  - Continue while the carried remainder still crosses the next threshold
+- Remove `_pendingLevelXpHold` and `_pendingLevelXpRemainder` in favor of `pendingLevelUps` and an internal `carryRemainder` local during `addXp`.
+- Replace `finalizeLevelUp()` with a method that reduces `pendingLevelUps` by 1 and sets `xpCurrent` to the remainder captured for the next level (see HUD/scene flow below). Consider an accessor to tell UI when more level-ups are pending.
+
+### UI/Scene Flow
+- PlayScene:
+  - When `pendingLevelUps > 0` and no Level Up dialog is open, pause gameplay and launch LevelUp scene.
+  - After the user makes a selection, call a new `playerState.consumePendingLevelUp()`:
+    - This updates `xpCurrent` to the remainder for the next level step.
+    - Decrement `pendingLevelUps`.
+  - If `pendingLevelUps > 0` after consumption, immediately re-open LevelUp for the next level (without needing new XP). Otherwise, resume PlayScene.
+
+### Eventing
+- Keep existing events (`xp:update`, `xp:progress`, `player:level`).
+- Optionally add `level:queue (remaining: number)` to let HUD show queued levels.
+
+### Edge Cases
+- Extremely large XP grants may enqueue many levels: cap `pendingLevelUps` (e.g., 10) and convert the rest into `xpCurrent` remainder after the last processed level.
+- Ensure saves persist `pendingLevelUps` to avoid losing queued dialogs across reloads.
+
+### Migration Plan
+1) PlayerState: introduce `pendingLevelUps` and loop in `addXp()` to compute multiple levels at once; emit `player:level` per increment.
+2) Replace deferred-hold mechanism with queued approach; add `consumePendingLevelUp()` to update `xpCurrent` between dialogs.
+3) PlayScene: change level-up open logic to check `pendingLevelUps` and loop opening LevelUp until the queue empties.
+4) Update docs and tests; ensure HUD reflects correct `xpCurrent/needed` between sequential dialogs.
+
 
