@@ -61,7 +61,8 @@ export class ChainLightning extends WeaponBase {
     const chainRange = Math.floor(this.chainRange * (stats.area || 1) * (1 + 0.10 * (up.radius || 0)));
     // Tome of Projectiles increases jumps additively beyond base (stats.projectiles is 1-based)
     const extraFromStats = Math.max(0, Math.floor((stats.projectiles || 1) - 1));
-    const jumps = Math.max(0, Math.floor((this.maxJumps || 0) + extraFromStats + (up.projectiles || 0)));
+    const projFromRolls = Math.max(0, Math.floor(up['roll_projectiles'] || 0));
+    const jumps = Math.max(0, Math.floor((this.maxJumps || 0) + extraFromStats + projFromRolls + (up.projectiles || 0)));
     const falloff = this.falloff; // keep constant for now
     return { damage: dmg, cooldownMs: cd, range, chainRange, maxJumps: jumps, falloff };
   }
