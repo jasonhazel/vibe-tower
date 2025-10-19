@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.15] - 2025-10-19
+### Added
+- Docs: Weapon Implementation Standards in `.cursor/rules/00-agent.mdc`.
+
 ## [0.1.14] - 2025-10-19
 ### Added
 - Cheat menu: buttons to unlock weapons for testing (Aura, Fireball, Slam, Chain Lightning).

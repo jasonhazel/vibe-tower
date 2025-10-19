@@ -22,9 +22,9 @@ export const gameConfig = {
   chainLightning: {
     baseDamage: 14,
     baseCooldownMs: 1800,
-    range: 180, // max distance from player to first target
-    chainRange: 140, // max distance between chained targets
-    maxJumps: 3, // additional targets after the first
+    range: 100, // max distance from player to first target
+    chainRange: 50, // max distance between chained targets
+    maxJumps: 0, // additional targets after the first
     falloff: 0.8, // damage multiplier per jump
   },
   slam: {
