@@ -273,23 +273,26 @@ class PlayScene extends Phaser.Scene {
 
     // Restart handler
     this.game.events.on('game:restart', () => {
-      // Reset player progress/state and scene timers
-      playerState.reset();
-      playerState.setPickupRadius?.(gameConfig.xpPickup.baseRadius);
-      SaveManager.clear();
-      this.runMs = 0;
-      this.enemyHpBonus = 0;
-      this._difficultyTimer = 0;
-      this.spawnBatchCount = 1;
-      this._spawnBatchTimer = 0;
-      this.enemySpeedMul = 1;
-      this._enemySpeedTimer = 0;
-      this._gameOverShown = false;
-      // Clear tome slots in HUD immediately
-      this._chosenTomes = [];
-      this.game.events.emit('tomes:update', []);
-      this.scene.stop('GameOver');
-      this.scene.restart();
+      // Defer heavy operations to next tick to avoid blocking input frame
+      setTimeout(() => {
+        // Reset player progress/state and scene timers
+        playerState.reset();
+        playerState.setPickupRadius?.(gameConfig.xpPickup.baseRadius);
+        try { SaveManager.clear(); } catch (_) {}
+        this.runMs = 0;
+        this.enemyHpBonus = 0;
+        this._difficultyTimer = 0;
+        this.spawnBatchCount = 1;
+        this._spawnBatchTimer = 0;
+        this.enemySpeedMul = 1;
+        this._enemySpeedTimer = 0;
+        this._gameOverShown = false;
+        // Clear tome slots in HUD immediately
+        this._chosenTomes = [];
+        this.game.events.emit('tomes:update', []);
+        this.scene.stop('GameOver');
+        this.scene.restart();
+      }, 0);
     });
 
     // Save only when queue is empty; defer heavy save to next tick to avoid frame hitch

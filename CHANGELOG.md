@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
 ## [0.1.0] - 2025-10-19
+## [0.1.6] - 2025-10-19
+### Fixed
+- Reduced restart hitch by deferring reset and save clearing to next tick.
+
 ## [0.1.5] - 2025-10-19
 ### Fixed
 - Reduced lag after final perk selection by deferring saves until queued level-ups are exhausted and removing redundant scene resumes.
