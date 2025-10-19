@@ -10,7 +10,7 @@ export const gameConfig = {
   aura: {
     tickIntervalMs: 250,
     damagePerTick: 5,
-    radius: 80,
+    radius: 60,
   },
   fireball: {
     baseDamage: 10,
@@ -22,7 +22,7 @@ export const gameConfig = {
   chainLightning: {
     baseDamage: 10,
     baseCooldownMs: 2000,
-    range: 83, // max distance from player to first target
+    range: 82, // max distance from player to first target
     chainRange: 50, // max distance between chained targets
     maxJumps: 0, // additional targets after the first
     falloff: 0.8, // damage multiplier per jump
@@ -38,11 +38,11 @@ export const gameConfig = {
   blades: {
     baseDamage: 6,
     baseCooldownMs: 250,
-    orbitRadius: 90,
+    orbitRadius: 83,
     rotationSpeed: 180,
     bladeLength: 16,
     bladeHitRadius: 8,
-    bladeCount: 2,
+    bladeCount: 1,
   },
   slam: {
     baseDamage: 50,
@@ -52,7 +52,7 @@ export const gameConfig = {
   },
   xpPickup: {
     // Starting pickup radius for XP crystals; smaller than aura radius (100)
-    baseRadius: 70,
+    baseRadius: 75,
   },
   enemy: {
     baseSpeed: 40,

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.25] - 2025-10-19
+## [0.1.26] - 2025-10-19
 ### Added
 - New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.
 ### Changed
@@ -15,6 +15,8 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - New weapon: Blades (orbiting blades dealing contact damage; upgrades: Damage, Tick, Radius, Rotation Speed, Blades). Wired into catalog, scene, cheat menu, stats panel.
 ### Changed
 - Blades: damage now applies on continuous contact (no cooldown); rotation speed scales with player attack speed.
+### Fixed
+- XP diamonds: pickup hitbox now scales with merge size and is considered in pickup distance, preventing large diamonds from overlapping the pickup ring without collecting.
 
 ## [0.1.19] - 2025-10-19
 ### Added

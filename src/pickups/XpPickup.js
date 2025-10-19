@@ -15,6 +15,8 @@ export class XpPickup extends PickupBase {
     rect.setScale(scale);
     // radius used for merging proximity checks (slightly generous)
     rect.setData('mergeR', 10 * scale);
+    // effective pickup radius scales with visual size (diamond half-diagonal ~ size * sqrt(2)/2)
+    rect.setData('hitR', 8 * scale);
     this.go = rect;
   }
 }

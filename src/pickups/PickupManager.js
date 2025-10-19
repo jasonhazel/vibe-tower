@@ -53,8 +53,11 @@ export class PickupManager {
       if (orb.getData('collecting')) return;
       const dx = orb.x - playerX;
       const dy = orb.y - playerY;
+      const hitR = Math.max(0, Number(orb.getData('hitR') || 8));
+      // include orb radius in pickup distance
+      const thresh = this.pickupRadius + hitR;
       const d2 = dx * dx + dy * dy;
-      if (d2 <= prSq) this._animateCollect(orb, playerX, playerY);
+      if (d2 <= thresh * thresh) this._animateCollect(orb, playerX, playerY);
     });
   }
 
