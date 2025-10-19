@@ -8,7 +8,7 @@ export const WeaponCatalog = [
     getUpgradeOptions(ps) {
       const s = ps?.getWeaponState?.()?.['aura'];
       if (!s || s.level <= 0) return [];
-      const mk = (key, label) => ({ id: `wupg-aura-${key}`, name: `Aura ${label}`, isUpgrade: true, isWeapon: true, weaponId: 'aura', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('aura', key) });
+      const mk = (key, label) => ({ id: `wupg-aura-${key}`, name: `Aura ${label}`, short: label, isUpgrade: true, isWeapon: true, weaponId: 'aura', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('aura', key) });
       return [mk('damage', 'Damage+'), mk('radius', 'Radius+'), mk('tick', 'Tick Faster')];
     },
   },
@@ -18,7 +18,7 @@ export const WeaponCatalog = [
     getUpgradeOptions(ps) {
       const s = ps?.getWeaponState?.()?.['fireball'];
       if (!s || s.level <= 0) return [];
-      const mk = (key, label) => ({ id: `wupg-fireball-${key}`, name: `Fireball ${label}`, isUpgrade: true, isWeapon: true, weaponId: 'fireball', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('fireball', key) });
+      const mk = (key, label) => ({ id: `wupg-fireball-${key}`, name: `Fireball ${label}`, short: label, isUpgrade: true, isWeapon: true, weaponId: 'fireball', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('fireball', key) });
       return [
         mk('damage', 'Damage+'),
         mk('cooldown', 'Faster Cast'),
@@ -35,7 +35,7 @@ export const WeaponCatalog = [
     getUpgradeOptions(ps) {
       const s = ps?.getWeaponState?.()?.['slam'];
       if (!s || s.level <= 0) return [];
-      const mk = (key, label) => ({ id: `wupg-slam-${key}`, name: `Slam ${label}`, isUpgrade: true, isWeapon: true, weaponId: 'slam', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('slam', key) });
+      const mk = (key, label) => ({ id: `wupg-slam-${key}`, name: `Slam ${label}`, short: label, isUpgrade: true, isWeapon: true, weaponId: 'slam', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('slam', key) });
       return [mk('damage', 'Damage+'), mk('cooldown', 'Faster Cooldown'), mk('radius', 'Max Radius+'), mk('growth', 'Faster Growth')];
     },
   },

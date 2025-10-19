@@ -10,19 +10,19 @@ export const gameConfig = {
   aura: {
     tickIntervalMs: 250,
     damagePerTick: 5,
-    radius: 80,
+    radius: 65,
   },
   fireball: {
     baseDamage: 10,
     projectileSpeed: 260,
     range: 160, // base targeting range
-    baseCooldownMs: 2500,
+    baseCooldownMs: 1500,
     radius: 4,
   },
   slam: {
     baseDamage: 50,
     baseCooldownMs: 5000,
-    maxRadius: 110,
+    maxRadius: 120,
     growthSpeed: 180, // px per second
   },
   xpPickup: {

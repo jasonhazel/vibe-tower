@@ -1,6 +1,7 @@
 import { TomeCatalog, tomeUpgradeOptions } from '../items/tomes/Tomes.js';
 import { WeaponCatalog } from '../items/weapons/WeaponCatalog.js';
 import { playerState } from '../state/PlayerState.js';
+import { PerkButton } from './components/PerkButton.js';
 
 export class LevelUpScene extends Phaser.Scene {
   constructor() { super('LevelUp'); }
@@ -30,12 +31,34 @@ export class LevelUpScene extends Phaser.Scene {
     const tomeOpts = tomeSlotsAvailable ? availableTomes : [];
     const upgOpts = tomeUpgradeOptions(chosenIds);
 
-    // Weapons: new unlocks (if not owned) and upgrades for owned
+    // Weapons: new unlocks (if not owned) and bundled upgrades for owned
     const ws = playerState.getWeaponState();
     const ownedWeaponIds = Object.keys(ws || {}).filter(id => ws[id]?.level > 0);
     const unownedWeapons = WeaponCatalog.filter(w => !ownedWeaponIds.includes(w.id));
     const weaponUnlocks = unownedWeapons.map(w => ({ id: `w-${w.id}`, name: w.name, isWeapon: true, weaponId: w.id, apply: () => playerState.addWeaponById(w.id) }));
-    const weaponUpgrades = WeaponCatalog.flatMap(w => w.getUpgradeOptions?.(playerState) || []);
+
+    // Build bundled upgrades: for each owned weapon, pick two distinct upgrade keys and present as one option
+    const weaponUpgrades = [];
+    for (const wMeta of WeaponCatalog) {
+      if (!ownedWeaponIds.includes(wMeta.id)) continue;
+      const opts = (wMeta.getUpgradeOptions?.(playerState) || []);
+      if (opts.length < 1) continue;
+      // choose two distinct if available
+      const shuffled = opts.slice();
+      for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
+      const first = shuffled[0];
+      const second = shuffled.find(o => o.upgradeKey !== first.upgradeKey) || null;
+      const bundle = [first, second].filter(Boolean);
+      if (bundle.length === 0) continue;
+      weaponUpgrades.push({
+        id: `wupg-bundle-${wMeta.id}-${first.upgradeKey}${second ? '-' + second.upgradeKey : ''}`,
+        name: `${wMeta.name} Upgrade Bundle`,
+        isUpgrade: true,
+        isWeapon: true,
+        weaponId: wMeta.id,
+        bundle,
+      });
+    }
 
     // Build weighted pool so tomes are more likely when slots available
     const weighted = [];
@@ -64,27 +87,14 @@ export class LevelUpScene extends Phaser.Scene {
     }
 
     const bw = Math.min(360, panelW - 40); // equal width buttons, stacked
-    const btnH = 44;
+    const btnH = 78; // fixed height for 3 lines
+    const btnGap = 12; // vertical spacing between buttons
     const bx = Math.floor(w / 2 - bw / 2);
     const by = y + 54;
 
-    const makeBtn = (bx, by, label, onClick) => {
-      const bh = btnH;
-      const g = this.add.graphics();
-      const draw = (bg = 0x263238, stroke = 0x8bc34a) => {
-        g.clear();
-        g.fillStyle(bg, 1);
-        g.fillRect(bx, by, bw, bh);
-        g.lineStyle(2, stroke, 1);
-        g.strokeRect(bx, by, bw, bh);
-      };
-      draw();
-      const txt = this.add.text(bx + bw / 2, by + bh / 2, label, { fontFamily: 'monospace', fontSize: '14px', color: '#ffffff', wordWrap: { width: bw - 24 } }).setOrigin(0.5);
-      const zone = this.add.zone(bx, by, bw, bh).setOrigin(0, 0).setInteractive({ useHandCursor: true });
-      zone.on('pointerover', () => draw(0x2e3b43));
-      zone.on('pointerout', () => draw());
-      zone.on('pointerdown', () => draw(0x1b252b));
-      zone.on('pointerup', () => { draw(); onClick?.(); });
+    const makeBtn = (bx, by, { title, line2, line3, strokeColor }, onClick) => {
+      const btn = new PerkButton(this, { x: bx, y: by, width: bw, height: btnH, rarityColor: strokeColor, title, line2, line3, onClick });
+      return btn;
     };
 
     // Stacked options with rarity rolls for tomes and weapon upgrades
@@ -93,19 +103,54 @@ export class LevelUpScene extends Phaser.Scene {
       let roll = null;
       if (!t.isWeapon) {
         roll = t.rollImpact?.() || null;
-      } else if (t.isUpgrade && t.rollImpact) {
-        // get weapon instance from PlayScene
+      } else if (t.isUpgrade && t.bundle) {
+        // Build combined label and color using best rarity among two rolls
         const wInst = play?.weaponManager?.weapons?.find?.(w => w.getId?.() === t.weaponId);
-        roll = t.rollImpact(wInst) || null;
+        const r1 = t.bundle[0]?.rollImpact?.(wInst) || null;
+        const r2 = t.bundle[1]?.rollImpact?.(wInst) || null;
+        // choose the rarer roll by rarityName rank (fallback to larger value)
+        const rank = (r) => {
+          if (!r) return 0;
+          const name = String(r.rarityName || '').toLowerCase();
+          const map = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5 };
+          return map[name] || 0;
+        };
+        roll = (rank(r1) > rank(r2)) ? r1 : (rank(r2) > rank(r1) ? r2 : ((r1 && r2) ? ((r1.value||0) >= (r2.value||0) ? r1 : r2) : (r1 || r2)));
+        // embed rolls so we can apply on click
+        t._bundleRolls = [r1, r2];
       }
-      const rollText = roll ? `  [${roll.rarityName || 'Roll'} +${(roll.value ?? 0).toFixed(2)}]` : '';
-      const label = `${t.name}${rollText}`;
-      makeBtn(bx, by + i * 52, label, () => {
-        // Apply choice (include roll for tomes)
+      let title = t.name;
+      let line2 = '';
+      let line3 = '';
+      if (t.isUpgrade && t.bundle) {
+        const [a, b] = t.bundle;
+        const [ra, rb] = t._bundleRolls || [];
+        line2 = a ? `${a.short}${ra && typeof ra.value === 'number' ? ` +${ra.value.toFixed(a.upgradeKey === 'projectiles' ? 0 : 2)}` : ''}` : '';
+        line3 = b ? `${b.short}${rb && typeof rb.value === 'number' ? ` +${rb.value.toFixed(b.upgradeKey === 'projectiles' ? 0 : 2)}` : ''}` : '';
+      } else if (!t.isWeapon && roll) {
+        line2 = `${roll.rarityName || 'Roll'} +${(roll.value ?? 0).toFixed(2)}`;
+      }
+      const strokeColor = roll?.rarityColor ? parseInt(String(roll.rarityColor).replace('#','0x')) : undefined;
+      makeBtn(bx, by + i * (btnH + btnGap), { title, line2, line3, strokeColor }, () => {
+        // Apply choice
         if (!t.isWeapon) {
-          t.apply(playerState, { roll });
+          if (t.isUpgrade) {
+            // Use tomeId when present and add rolled value to the tome's sum
+            const tid = t.tomeId || t.id;
+            playerState.upgradeTomeById?.(tid, roll?.value);
+          } else {
+            t.apply(playerState, { roll });
+          }
         } else {
-          t.apply(playerState);
+          if (t.bundle) {
+            // Apply both upgrades with their rolls
+            const [a, b] = t.bundle;
+            const [ra, rb] = t._bundleRolls || [];
+            if (a) playerState.upgradeWeaponById?.(t.weaponId, a.upgradeKey, ra?.value);
+            if (b) playerState.upgradeWeaponById?.(t.weaponId, b.upgradeKey, rb?.value);
+          } else {
+            t.apply(playerState);
+          }
         }
         // Branch by type
         if (t.isWeapon) {
@@ -123,8 +168,7 @@ export class LevelUpScene extends Phaser.Scene {
           if (!t.isUpgrade) {
             this.game.events.emit('tome:selected', t.id);
           } else {
-            playerState.upgradeTomeById?.(t.id, roll?.value);
-            this.game.events.emit('tome:upgraded', t.id);
+            this.game.events.emit('tome:upgraded', t.tomeId || t.id);
           }
         }
         // Clear deferred XP after selection

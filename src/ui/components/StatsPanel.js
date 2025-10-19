@@ -92,10 +92,6 @@ export class StatsPanel {
                 const rolls = tomeState[tid]?.rolls || [];
                 const mods = t.getModifiers?.({ tomeLevel: level, rolls }) || [];
                 const entries = [ ['Level', String(level)] ];
-                if ((rolls?.length || 0) > 0) {
-                    const sum = rolls.reduce((a, b) => a + (Number(b)||0), 0);
-                    entries.push(['Rolled', `+${sum.toFixed(2)}`]);
-                }
 				for (const m of mods) {
 					if (!m || !m.stat) continue;
 					const statName = String(m.stat);
