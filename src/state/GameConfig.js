@@ -35,6 +35,15 @@ export const gameConfig = {
     radius: 6,
     pierce: 2,
   },
+  blades: {
+    baseDamage: 6,
+    baseCooldownMs: 250,
+    orbitRadius: 90,
+    rotationSpeed: 180,
+    bladeLength: 16,
+    bladeHitRadius: 8,
+    bladeCount: 2,
+  },
   slam: {
     baseDamage: 50,
     baseCooldownMs: 5000,

@@ -6,6 +6,7 @@ import { Fireball } from './items/weapons/Fireball.js';
 import { Slam } from './items/weapons/Slam.js';
 import { Boomerang } from './items/weapons/Boomerang.js';
 import { ChainLightning } from './items/weapons/ChainLightning.js';
+import { Blades } from './items/weapons/Blades.js';
 import { EnemyManager } from './entities/enemies/EnemyManager.js';
 import { HUDScene } from './ui/HUDScene.js';
 import { GameOverScene } from './ui/GameOverScene.js';
@@ -155,6 +156,18 @@ class PlayScene extends Phaser.Scene {
       });
       this.weaponManager.add(slam);
     };
+    const addBlades = () => {
+      const b = new Blades(this, this.weaponManager.context, {
+        baseCooldownMs: gameConfig.blades.baseCooldownMs,
+        baseDamage: gameConfig.blades.baseDamage,
+        orbitRadius: gameConfig.blades.orbitRadius,
+        rotationSpeed: gameConfig.blades.rotationSpeed,
+        bladeLength: gameConfig.blades.bladeLength,
+        bladeHitRadius: gameConfig.blades.bladeHitRadius,
+        bladeCount: gameConfig.blades.bladeCount,
+      });
+      this.weaponManager.add(b);
+    };
     const addBoomerang = () => {
       const b = new Boomerang(this, this.weaponManager.context, {
         baseCooldownMs: gameConfig.boomerang.baseCooldownMs,
@@ -184,6 +197,7 @@ class PlayScene extends Phaser.Scene {
     } else {
       if (owned.includes('aura')) addAura();
       if (owned.includes('fireball')) addFireball();
+      if (owned.includes('blades')) addBlades();
       if (owned.includes('slam')) addSlam();
       if (owned.includes('boomerang')) addBoomerang();
       if (owned.includes('chainLightning')) addChainLightning();
@@ -222,6 +236,9 @@ class PlayScene extends Phaser.Scene {
       } else if (weaponId === 'boomerang') {
         playerState.addWeaponById('boomerang');
         addBoomerang();
+      } else if (weaponId === 'blades') {
+        playerState.addWeaponById('blades');
+        addBlades();
       } else if (weaponId === 'chainLightning') {
         playerState.addWeaponById('chainLightning');
         addChainLightning();

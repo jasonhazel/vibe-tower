@@ -164,6 +164,17 @@ export class StatsPanel {
 							['Boom rad', `${rp.radius ?? w.radius}`],
 						],
 					});
+				} else if (id === 'blades') {
+					groups.push({
+						name: 'Blades',
+						entries: [
+							['Blade tick', `${rp.cooldownMs ?? w.cooldownMs}ms`],
+							['Blade dmg', `${rp.damage ?? w.baseDamage}`],
+							['Blade cnt', `${rp.bladeCount ?? 1}`],
+							['Blade rad', `${rp.radius ?? w.orbitRadius}`],
+							['Blade rot', `${Math.round(rp.rotationSpeed ?? w.rotationSpeed)}`],
+						],
+					});
 				}
 			}
 		} catch (_) {}
@@ -173,7 +184,7 @@ export class StatsPanel {
 		let tomeEntries = [];
 		for (let gi = 1; gi < groups.length; gi++) {
 			const g = groups[gi];
-			if (g.name === 'Aura' || g.name === 'Fireball' || g.name === 'Slam' || g.name === 'Chain Lightning' || g.name === 'Boomerang') {
+			if (g.name === 'Aura' || g.name === 'Fireball' || g.name === 'Slam' || g.name === 'Chain Lightning' || g.name === 'Boomerang' || g.name === 'Blades') {
 				weaponEntries.push([`— ${g.name} —`, '']);
 				for (const e of g.entries) weaponEntries.push(e);
 			} else if (g.name !== 'Player') {
