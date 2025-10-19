@@ -2,6 +2,8 @@ import { playerState } from '../state/PlayerState.js';
 import { gameConfig } from '../state/GameConfig.js';
 import { EventBus } from '../state/EventBus.js';
 import { XpPickup } from './XpPickup.js';
+import { HealthPickup } from './HealthPickup.js';
+import { MagnetPickup } from './MagnetPickup.js';
 
 export class PickupManager {
   constructor(scene) {
@@ -18,7 +20,7 @@ export class PickupManager {
     const out = [];
     this.group.children.iterate((orb) => {
       if (!orb || !orb.active) return;
-      out.push({ x: orb.x, y: orb.y, amount: orb.getData('amount') || 1 });
+      out.push({ x: orb.x, y: orb.y, amount: orb.getData('amount') || 1, type: orb.getData('type') || 'xp' });
     });
     return out;
   }
@@ -28,7 +30,11 @@ export class PickupManager {
     // clear existing
     try { this.group.clear(true, true); } catch (_) {}
     for (const o of list) {
-      this.spawnXpAt({ x: o.x, y: o.y }, o.amount || 1);
+      // Back-compat: previously only XP existed
+      const type = o.type || 'xp';
+      if (type === 'health') this.spawnHealthAt({ x: o.x, y: o.y }, o.amount || 1);
+      else if (type === 'magnet') this.spawnMagnetAt({ x: o.x, y: o.y });
+      else this.spawnXpAt({ x: o.x, y: o.y }, o.amount || 1);
     }
   }
 
@@ -42,6 +48,23 @@ export class PickupManager {
     return pickup.getGO();
   }
 
+  spawnHealthAt({ x, y }, healAmount = 10) {
+    // small flash
+    const flash = this.scene.add.circle(x, y, 4, 0x8bc34a, 1);
+    this.scene.tweens.add({ targets: flash, radius: 14, alpha: 0, duration: 200, ease: 'quad.out', onComplete: () => flash.destroy() });
+    const pickup = new HealthPickup(this.scene, x, y, healAmount);
+    this.group.add(pickup.getGO());
+    return pickup.getGO();
+  }
+
+  spawnMagnetAt({ x, y }) {
+    const flash = this.scene.add.circle(x, y, 4, 0x42a5f5, 1);
+    this.scene.tweens.add({ targets: flash, radius: 14, alpha: 0, duration: 200, ease: 'quad.out', onComplete: () => flash.destroy() });
+    const pickup = new MagnetPickup(this.scene, x, y);
+    this.group.add(pickup.getGO());
+    return pickup.getGO();
+  }
+
   update(playerX, playerY) {
     const override = playerState.getPickupRadius?.();
     const pr = override != null ? override : this.pickupRadius;
@@ -51,6 +74,12 @@ export class PickupManager {
     this.group.children.iterate((orb) => {
       if (!orb) return;
       if (orb.getData('collecting')) return;
+      // Health packs should not collect if player is full health
+      const type = orb.getData('type') || 'xp';
+      if (type === 'health') {
+        const isFull = (playerState.getHealthCurrent?.() >= playerState.getHealthMax?.());
+        if (isFull) return;
+      }
       const dx = orb.x - playerX;
       const dy = orb.y - playerY;
       const hitR = Math.max(0, Number(orb.getData('hitR') || 8));
@@ -66,10 +95,13 @@ export class PickupManager {
     for (let i = 0; i < orbs.length; i++) {
       const a = orbs[i];
       if (!a || !a.active || a.getData('collecting')) continue;
+      // only XP orbs merge
+      if ((a.getData('type') || 'xp') !== 'xp') continue;
       const ar = a.getData('mergeR') || 7;
       for (let j = i + 1; j < orbs.length; j++) {
         const b = orbs[j];
         if (!b || !b.active || b.getData('collecting')) continue;
+        if ((b.getData('type') || 'xp') !== 'xp') continue;
         const br = b.getData('mergeR') || 7;
         const dx = a.x - b.x;
         const dy = a.y - b.y;
@@ -98,6 +130,7 @@ export class PickupManager {
     if (orb.getData('collecting')) return;
     orb.setData('collecting', true);
     const amount = orb.getData('amount') || 1;
+    const type = orb.getData('type') || 'xp';
     const dx = playerX - orb.x;
     const dy = playerY - orb.y;
     const dist = Math.hypot(dx, dy);
@@ -112,11 +145,25 @@ export class PickupManager {
       duration,
       onComplete: () => {
         if (orb.active) orb.destroy();
-        // Show floating XP gain text (uses PlayerState preview which respects overflow)
-        const granted = playerState.previewXpGrant ? playerState.previewXpGrant(amount) : amount;
-        // Display above the player rather than the orb
-        this._showXpText(playerX, playerY - 24, granted);
-        playerState.addXp(amount);
+        if (type === 'xp') {
+          // Show floating XP gain text (uses PlayerState preview which respects overflow)
+          const granted = playerState.previewXpGrant ? playerState.previewXpGrant(amount) : amount;
+          // Display above the player rather than the orb
+          this._showXpText(playerX, playerY - 24, granted);
+          playerState.addXp(amount);
+          // Log XP collection with current progress and requirement
+          try {
+            const current = playerState.getXpCurrent?.();
+            const needed = playerState.getXpNeeded?.();
+            console.log('[xp] collect', { amount: granted, current, needed });
+          } catch (_) {}
+        } else if (type === 'health') {
+          // Heal and show small green heal text
+          playerState.heal(amount);
+          this._showHealText(playerX, playerY - 24, amount);
+        } else if (type === 'magnet') {
+          this._collectAllXp(playerX, playerY);
+        }
       },
     });
   }
@@ -133,6 +180,30 @@ export class PickupManager {
       ease: 'sine.out',
       onComplete: () => txt.destroy(),
     });
+  }
+
+  _showHealText(x, y, amt) {
+    const txt = this.scene.add.text(x, y, `+${amt} HP`, { fontFamily: 'monospace', fontSize: '12px', color: '#81c784' })
+      .setOrigin(0.5)
+      .setDepth(1000);
+    this.scene.tweens.add({
+      targets: txt,
+      y: y - 14,
+      alpha: { from: 1, to: 0 },
+      duration: 1000,
+      ease: 'sine.out',
+      onComplete: () => txt.destroy(),
+    });
+  }
+
+  _collectAllXp(playerX, playerY) {
+    const orbs = this.group.getChildren().filter(Boolean);
+    for (const orb of orbs) {
+      if (!orb || !orb.active) continue;
+      if ((orb.getData('type') || 'xp') !== 'xp') continue;
+      // trigger collect animation immediately toward player
+      this._animateCollect(orb, playerX, playerY);
+    }
   }
 }
 

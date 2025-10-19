@@ -115,6 +115,77 @@ export class CheatMenu {
 		addXpBtn(100, '+100 XP');
 		y += bh + 6;
 		addXpBtn(500, '+500 XP');
+		// Health controls
+		y += bh + 6;
+		makeBtn('Heal +5 HP', margin, y, () => playerState.heal?.(5));
+		y += bh + 6;
+		makeBtn('Damage 5 HP', margin, y, () => playerState.damage?.(5));
+		// Spawn Healthpack
+		y += bh + 6;
+		makeBtn('Spawn Healthpack', margin, y, () => {
+			try {
+				const play = this.scene.scene.get('PlayScene');
+				if (play?.pickups) {
+					const { x, y } = play.tower.getCenter();
+					const ang = Math.random() * Math.PI * 2;
+					const dist = 30 + Math.random() * 20;
+					const px = x + Math.cos(ang) * dist;
+					const py = y + Math.sin(ang) * dist;
+					const heal = Math.max(1, Math.floor((window.gameConfig?.loot?.healthpack?.healAmount) || 20));
+					play.pickups.spawnHealthAt({ x: px, y: py }, heal);
+				}
+			} catch (_) {}
+		});
+		// Spawn Magnet
+		y += bh + 6;
+		makeBtn('Spawn Magnet', margin, y, () => {
+			try {
+				const play = this.scene.scene.get('PlayScene');
+				if (play?.pickups) {
+					const { x, y } = play.tower.getCenter();
+					const ang = Math.random() * Math.PI * 2;
+					const dist = 30 + Math.random() * 20;
+					const px = x + Math.cos(ang) * dist;
+					const py = y + Math.sin(ang) * dist;
+					play.pickups.spawnMagnetAt({ x: px, y: py });
+				}
+			} catch (_) {}
+		});
+		// Spawn XP Diamond (random large XP orb)
+			y += bh + 6;
+			makeBtn('Spawn XP Diamond', margin, y, () => {
+				try {
+					const play = this.scene.scene.get('PlayScene');
+					if (play?.pickups) {
+						const { x, y } = play.tower.getCenter();
+						// drop somewhere in a ring around player
+						const ang = Math.random() * Math.PI * 2;
+						const dist = 120 + Math.random() * 160; // spread farther to test vacuum
+						const px = x + Math.cos(ang) * dist;
+						const py = y + Math.sin(ang) * dist;
+						// large amount to force multi-level behavior
+						const amount = 150; // tweak as needed during testing
+						play.pickups.spawnXpAt({ x: px, y: py }, amount);
+					}
+				} catch (_) {}
+			});
+
+		// Pause/Resume PlayScene (HUD remains active)
+			y += bh + 6;
+			makeBtn('Pause/Resume', margin, y, () => {
+				try {
+					const play = this.scene.scene.get('PlayScene');
+					if (!play) return;
+					// Toggle paused state for PlayScene only
+					if (play.scene.isPaused()) {
+						// resume gameplay
+						play.scene.resume();
+					} else {
+						// pause gameplay scene; HUD stays responsive
+						play.scene.pause();
+					}
+				} catch (_) {}
+			});
 	}
 }
 
