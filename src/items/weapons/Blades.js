@@ -50,7 +50,8 @@ export class Blades extends WeaponBase {
     const dmg = Math.max(1, Math.floor(this.baseDamage * (stats.damage || 1) * (1 + 0.15 * (up.damage || 0))));
     const radius = Math.floor(this.orbitRadius * (stats.area || 1) * (1 + 0.10 * (up.radius || 0)));
     const rotSpeed = this.rotationSpeed * Math.max(0.1, stats.attackSpeed || 1) * (1 + 0.10 * (up.speed || 0));
-    const count = Math.max(1, Math.floor((this.baseBladeCount || 1) + (up.projectiles || 0) + Math.max(0, Math.floor((stats.projectiles || 1) - 1))));
+    const projFromRolls = Math.max(0, Math.floor(up['roll_projectiles'] || 0));
+    const count = Math.max(1, Math.floor((this.baseBladeCount || 1) + projFromRolls + (up.projectiles || 0) + Math.max(0, Math.floor((stats.projectiles || 1) - 1))));
     return { damage: dmg, radius, rotationSpeed: rotSpeed, bladeCount: count, bladeHitRadius: this.bladeHitRadius, bladeLength: this.bladeLength };
   }
 

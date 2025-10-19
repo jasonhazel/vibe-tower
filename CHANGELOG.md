@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.27] - 2025-10-19
+## [0.1.28] - 2025-10-19
 ### Added
 - New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.
 ### Changed
@@ -19,6 +19,8 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - XP diamonds: pickup hitbox now scales with merge size and is considered in pickup distance, preventing large diamonds from overlapping the pickup ring without collecting.
 ### Changed
 - XP diamonds: increased max visual scale clamp from 2x to 3x (with matching merge and pickup radii).
+### Fixed
+- Blades: More Blades +1 upgrade now properly increases blade count (supports rolled values).
 
 ## [0.1.19] - 2025-10-19
 ### Added
