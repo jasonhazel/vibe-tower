@@ -11,6 +11,7 @@ import { EnemyManager } from './entities/enemies/EnemyManager.js';
 import { HUDScene } from './ui/HUDScene.js';
 import { GameOverScene } from './ui/GameOverScene.js';
 import { LevelUpScene } from './ui/LevelUpScene.js';
+import { StartWeaponScene } from './ui/StartWeaponScene.js';
 import { gameConfig } from './state/GameConfig.js';
 import { playerState } from './state/PlayerState.js';
 import { EventBus } from './state/EventBus.js';
@@ -191,11 +192,10 @@ class PlayScene extends Phaser.Scene {
       this.weaponManager.add(cl);
     };
     if (owned.length === 0) {
-      // Prompt for starting weapon selection
+      // Prompt for starting weapon selection (dedicated scene)
       this._levelUpOpen = true;
       this.scene.pause();
-      this.scene.launch('LevelUp', { chosenIds: [], maxTomes: 4, startingWeaponSelect: true });
-      // On selection, LevelUpScene emits 'weapon:add' which we handle below
+      this.scene.launch('StartWeapon');
     } else {
       if (owned.includes('aura')) addAura();
       if (owned.includes('fireball')) addFireball();
@@ -534,7 +534,7 @@ const config = {
   height: document.documentElement.clientHeight,
   parent: 'app',
   backgroundColor: gameConfig.backgroundColor,
-  scene: [PlayScene, HUDScene, GameOverScene, LevelUpScene],
+  scene: [PlayScene, HUDScene, GameOverScene, LevelUpScene, StartWeaponScene],
   scale: {
     mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
