@@ -55,7 +55,8 @@ export class Boomerang extends WeaponBase {
     const range = Math.floor(this.range * (stats.area || 1) * (1 + 0.10 * (up.range || 0)));
     const speed = this.projectileSpeed * (1 + 0.10 * (up.speed || 0));
     const rad = Math.floor(this.radius * (1 + 0.10 * (up.radius || 0)));
-    const count = Math.max(1, Math.floor((stats.projectiles || 1) + (up.projectiles || 0)));
+    const projFromRolls = Math.max(0, Math.floor(up['roll_projectiles'] || 0));
+    const count = Math.max(1, Math.floor((stats.projectiles || 1) + projFromRolls + (up.projectiles || 0)));
     const pierce = Math.max(0, Math.floor(this.pierce));
     return { damage: dmg, cooldownMs: cd, range, projectileSpeed: speed, radius: rad, projectiles: count, pierce };
   }

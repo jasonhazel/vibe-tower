@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.37] - 2025-10-19
+## [0.1.38] - 2025-10-19
 ### Added
 - New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.
 ### Changed
@@ -35,6 +35,8 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
  - XP pickup radius ring now also respects the cheat-only visibility toggle.
 ### Fixed
 - Weapon upgrades that add projectiles now apply rolled values (`roll_projectiles`) for Fireball and Chain Lightning (jumps).
+### Fixed
+- Level Up: weapon unlock options are suppressed when all weapon slots are full; only upgrades/tomes are shown.
 
 ## [0.1.19] - 2025-10-19
 ### Added

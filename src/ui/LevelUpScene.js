@@ -34,7 +34,9 @@ export class LevelUpScene extends Phaser.Scene {
     // Weapons: new unlocks (if not owned) and bundled upgrades for owned
     const ws = playerState.getWeaponState();
     const ownedWeaponIds = Object.keys(ws || {}).filter(id => ws[id]?.level > 0);
-    const unownedWeapons = startingWeaponSelect ? WeaponCatalog : WeaponCatalog.filter(w => !ownedWeaponIds.includes(w.id));
+    const maxWeaponSlots = 4;
+    const weaponSlotsAvailable = ownedWeaponIds.length < maxWeaponSlots;
+    const unownedWeapons = startingWeaponSelect ? WeaponCatalog : (weaponSlotsAvailable ? WeaponCatalog.filter(w => !ownedWeaponIds.includes(w.id)) : []);
     const weaponUnlocks = unownedWeapons.map(w => ({ id: `w-${w.id}`, name: w.name, isWeapon: true, weaponId: w.id, apply: () => playerState.addWeaponById(w.id) }));
 
     // Build bundled upgrades: for each owned weapon, pick two distinct upgrade keys and present as one option
@@ -67,7 +69,7 @@ export class LevelUpScene extends Phaser.Scene {
       pushWeighted(tomeOpts, tomeSlotsAvailable ? 3 : 1);
       pushWeighted(upgOpts, 1);
       // Weapons weighted even higher than tomes when unlocking; upgrades normal
-      pushWeighted(weaponUnlocks, tomeSlotsAvailable ? 4 : 2);
+      if (weaponSlotsAvailable) pushWeighted(weaponUnlocks, tomeSlotsAvailable ? 4 : 2);
       pushWeighted(weaponUpgrades, 1);
     } else {
       // Starting selection: only weapons, heavier weight for variety
