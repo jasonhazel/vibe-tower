@@ -266,7 +266,11 @@ export class HUDScene extends Phaser.Scene {
         try {
           const play = this.scene.get('PlayScene');
           if (play?.weaponManager?.weapons) {
-            play.weaponManager.weapons.forEach(w => w.rangeGfx && (w.rangeGfx.visible = !!visible));
+            play.weaponManager.weapons.forEach(w => {
+              if (w.rangeGfx) w.rangeGfx.visible = !!visible;
+              // Aura uses `graphics` for its range ring
+              try { if (w.getId?.() === 'aura' && w.graphics) w.graphics.visible = !!visible; } catch (_) {}
+            });
           }
         } catch (_) {}
       };
