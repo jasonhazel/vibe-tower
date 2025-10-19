@@ -11,7 +11,7 @@ export class XpPickup extends PickupBase {
     rect.setData('type', 'xp');
     rect.setData('amount', amount);
     // visual scale and merge radius based on amount
-    const scale = Math.min(2, 1 + 0.06 * (amount - 1));
+    const scale = Math.min(3, 1 + 0.06 * (amount - 1));
     rect.setScale(scale);
     // radius used for merging proximity checks (slightly generous)
     rect.setData('mergeR', 10 * scale);

@@ -10,7 +10,7 @@ export const gameConfig = {
   aura: {
     tickIntervalMs: 250,
     damagePerTick: 5,
-    radius: 60,
+    radius: 80,
   },
   fireball: {
     baseDamage: 10,
@@ -52,7 +52,7 @@ export const gameConfig = {
   },
   xpPickup: {
     // Starting pickup radius for XP crystals; smaller than aura radius (100)
-    baseRadius: 75,
+    baseRadius: 70,
   },
   enemy: {
     baseSpeed: 40,
