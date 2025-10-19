@@ -93,8 +93,8 @@ export class GameOverScene extends Phaser.Scene {
 
   async _shareScoreCard({ runMs, xpTotal, level }) {
     try {
-      const w = 600;
-      const h = 315; // 2:1-ish card
+      const w = 640;
+      const h = 420; // taller to include stats
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
@@ -110,19 +110,41 @@ export class GameOverScene extends Phaser.Scene {
       ctx.font = 'bold 28px monospace';
       ctx.textAlign = 'center';
       ctx.fillText('Vibe Tower - Run Summary', w / 2, 56);
-      // Stats
+      // Basic stats
       const totalSeconds = Math.floor(runMs / 1000);
       const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
       const ss = String(totalSeconds % 60).padStart(2, '0');
       ctx.font = '18px monospace';
       ctx.textAlign = 'left';
-      const left = 64;
-      let y = 110;
-      const dy = 30;
+      const left = 40;
+      let y = 100;
+      const dy = 28;
       ctx.fillStyle = '#e0e0e0';
       ctx.fillText(`Time: ${mm}:${ss}`, left, y); y += dy;
       ctx.fillText(`Level: ${level}`, left, y); y += dy;
       ctx.fillText(`XP: ${xpTotal}`, left, y); y += dy;
+
+      // Player stats
+      const s = playerState.getStats?.() || {};
+      const statRows = [
+        ['Area', s.area],
+        ['Damage', s.damage],
+        ['Projectiles', s.projectiles],
+        ['Attack Speed', s.attackSpeed],
+        ['Pickup', s.pickup],
+        ['XP Mult', s.xp],
+      ];
+      const colX = left + 320;
+      let y2 = 100;
+      ctx.fillStyle = '#b0bec5';
+      ctx.font = '16px monospace';
+      ctx.fillText('Stats', colX, y2 - 10);
+      ctx.fillStyle = '#e0e0e0';
+      statRows.forEach(([label, val]) => {
+        const v = (typeof val === 'number') ? (label === 'Projectiles' ? String(Math.floor(val)) : val.toFixed(2)) : String(val ?? '-');
+        ctx.fillText(`${label}: ${v}`, colX, y2);
+        y2 += 24;
+      });
       // Footer
       ctx.fillStyle = '#90caf9';
       ctx.font = '14px monospace';

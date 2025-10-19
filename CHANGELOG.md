@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.8] - 2025-10-19
+### Added
+- Share image now includes player stats (area, damage, projectiles, attack speed, pickup, XP mult).
+
 ## [0.1.7] - 2025-10-19
 ### Added
 - Game Over: Share button to generate a score card image and copy to clipboard.
