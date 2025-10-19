@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.18] - 2025-10-19
+## [0.1.19] - 2025-10-19
 ### Added
-- Stats panel: Chain Lightning stats (cd, dmg, jumps, ranges).
-- Docs: standards now include adding stats panel entries for new weapons.
+- Chain Lightning: Tome of Projectiles now increases chain jumps.
+- Docs: standards clarify mapping of global projectiles to weapon behavior.
 
 ## [0.1.14] - 2025-10-19
 ### Added
