@@ -12,8 +12,9 @@ export class Blades extends WeaponBase {
     this.bladeLength = config.bladeLength ?? gameConfig.blades.bladeLength;
     this.bladeHitRadius = config.bladeHitRadius ?? gameConfig.blades.bladeHitRadius;
     this.baseBladeCount = config.bladeCount ?? gameConfig.blades.bladeCount;
-    // No damage cooldown; damage is applied on contact each frame
+    // No global cooldown; damage is applied on contact with a short per-enemy throttle
     this.blades = [];
+    this._nextHitTimeByEnemy = new Map();
     // Visual range ring for orbit radius
     this.rangeGfx = scene.add.graphics();
     this._redrawRange();
@@ -85,9 +86,16 @@ export class Blades extends WeaponBase {
 
   _applyDamage(rp) {
     const { enemiesGroup } = this.context;
+    const now = this.scene.time?.now ?? performance.now();
+    const contactCd = 120; // ms between hits per enemy for combined blades
     enemiesGroup.children.iterate((e) => {
       if (!e) return;
       const ex = e.x; const ey = e.y; const er = e.getData('radius') || 10;
+      // assign a stable id for throttle map
+      let eid = e.getData('__id');
+      if (!eid) { eid = Math.random().toString(36).slice(2); e.setData('__id', eid); }
+      const nextOk = this._nextHitTimeByEnemy.get(eid) || 0;
+      if (now < nextOk) return;
       for (const b of this.blades) {
         const dx = ex - b.g.x; const dy = ey - b.g.y;
         const hitR = rp.bladeHitRadius + er;
@@ -99,6 +107,7 @@ export class Blades extends WeaponBase {
             this.context.spawnXp?.({ x: ex + Math.cos(ang) * r, y: ey + Math.sin(ang) * r }, 1);
             e.destroy();
           }
+          this._nextHitTimeByEnemy.set(eid, now + contactCd);
           break;
         }
       }
