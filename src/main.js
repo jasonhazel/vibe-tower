@@ -17,6 +17,8 @@ import { PickupRadiusVisual } from './pickups/PickupRadiusVisual.js';
 import { hudTheme } from './ui/theme.js';
 import { SaveManager } from './state/SaveManager.js';
 import pkg from '../package.json';
+// Expose version for dynamic footer fallback in share image
+try { window.VIBE_TOWER_VERSION = pkg.version; } catch (_) {}
 
 let GAME_WIDTH = gameConfig.width;
 let GAME_HEIGHT = gameConfig.height;

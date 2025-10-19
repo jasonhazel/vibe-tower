@@ -213,11 +213,18 @@ export class GameOverScene extends Phaser.Scene {
         tx += iconSize + gap;
         if ((idx + 1) % 6 === 0) { tx = colX + iconSize / 2; ty += iconSize + gap; }
       });
-      // Footer
+      // Footer (show current version)
       ctx.fillStyle = '#90caf9';
       ctx.font = '14px monospace';
       ctx.textAlign = 'right';
-      ctx.fillText('vibes.tower', w - 16, h - 18);
+      try {
+        // Lazy import to avoid bundler static import issues here
+        const ver = (await import('../../package.json', { assert: { type: 'json' } }).then(m => m.default?.version || m.version).catch(() => null))
+          || (window?.VIBE_TOWER_VERSION);
+        ctx.fillText(`v${ver ?? '?.?.?'}`, w - 16, h - 18);
+      } catch (_) {
+        ctx.fillText('v?.?.?', w - 16, h - 18);
+      }
 
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('toBlob failed');
