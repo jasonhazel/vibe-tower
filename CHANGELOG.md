@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.0] - 2025-10-19
 ## [0.1.6] - 2025-10-19
 ### Fixed
 - Reduced restart hitch by deferring reset and save clearing to next tick.

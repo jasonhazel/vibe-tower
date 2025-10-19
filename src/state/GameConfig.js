@@ -10,7 +10,7 @@ export const gameConfig = {
   aura: {
     tickIntervalMs: 250,
     damagePerTick: 5,
-    radius: 65,
+    radius: 80,
   },
   fireball: {
     baseDamage: 10,
@@ -22,7 +22,7 @@ export const gameConfig = {
   slam: {
     baseDamage: 50,
     baseCooldownMs: 5000,
-    maxRadius: 120,
+    maxRadius: 90,
     growthSpeed: 180, // px per second
   },
   xpPickup: {
