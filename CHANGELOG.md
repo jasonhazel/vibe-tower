@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.45] - 2025-10-19
+### Fixed
+- XP multi-level pickups: XP bar now drops to the correct remainder between sequential level-up dialogs using a per-level progress queue.
+
+### Added
+- Cheat menu: Spawn XP Diamond button to drop a large XP orb at a random position for testing multi-level collection.
+- Cheat menu: Pause/Resume button to pause/resume the PlayScene while keeping HUD/cheat controls active.
+
 ## [0.1.44] - 2025-10-19
 ### Added
 - Loot system: enemies can drop loot instead of XP (weighted pool in `gameConfig.loot`).
