@@ -152,6 +152,18 @@ export class StatsPanel {
 							['CL chainR', `${rp.chainRange ?? w.chainRange}`],
 						],
 					});
+				} else if (id === 'boomerang') {
+					groups.push({
+						name: 'Boomerang',
+						entries: [
+							['Boom cd', `${rp.cooldownMs ?? w.cooldownMs}ms`],
+							['Boom dmg', `${rp.damage ?? w.baseDamage}`],
+							['Boom count', `${rp.projectiles ?? 1}`],
+							['Boom rng', `${rp.range ?? w.range}`],
+							['Boom spd', `${Math.round(rp.projectileSpeed ?? w.projectileSpeed)}`],
+							['Boom rad', `${rp.radius ?? w.radius}`],
+						],
+					});
 				}
 			}
 		} catch (_) {}
@@ -161,7 +173,7 @@ export class StatsPanel {
 		let tomeEntries = [];
 		for (let gi = 1; gi < groups.length; gi++) {
 			const g = groups[gi];
-			if (g.name === 'Aura' || g.name === 'Fireball' || g.name === 'Slam' || g.name === 'Chain Lightning') {
+			if (g.name === 'Aura' || g.name === 'Fireball' || g.name === 'Slam' || g.name === 'Chain Lightning' || g.name === 'Boomerang') {
 				weaponEntries.push([`— ${g.name} —`, '']);
 				for (const e of g.entries) weaponEntries.push(e);
 			} else if (g.name !== 'Player') {

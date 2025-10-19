@@ -87,6 +87,7 @@ export class CheatMenu {
 				{ id: 'fireball', name: 'Fireball' },
 				{ id: 'slam', name: 'Slam' },
 				{ id: 'chainLightning', name: 'Chain Lightning' },
+				{ id: 'boomerang', name: 'Boomerang' },
 			];
 			const unownedWeapons = allWeapons.filter(w => !ownedWeapons.includes(w.id));
 			if (unownedWeapons.length > 0) {

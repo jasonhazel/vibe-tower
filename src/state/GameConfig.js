@@ -27,6 +27,14 @@ export const gameConfig = {
     maxJumps: 0, // additional targets after the first
     falloff: 0.8, // damage multiplier per jump
   },
+  boomerang: {
+    baseDamage: 12,
+    baseCooldownMs: 1300,
+    range: 160,
+    projectileSpeed: 220,
+    radius: 6,
+    pierce: 2,
+  },
   slam: {
     baseDamage: 50,
     baseCooldownMs: 5000,

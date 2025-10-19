@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.20] - 2025-10-19
+### Added
+- New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.
+
 ## [0.1.19] - 2025-10-19
 ### Added
 - Chain Lightning: Tome of Projectiles now increases chain jumps.

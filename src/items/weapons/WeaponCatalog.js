@@ -13,6 +13,23 @@ export const WeaponCatalog = [
     },
   },
   {
+    id: 'boomerang',
+    name: 'Boomerang',
+    getUpgradeOptions(ps) {
+      const s = ps?.getWeaponState?.()?.['boomerang'];
+      if (!s || s.level <= 0) return [];
+      const mk = (key, label) => ({ id: `wupg-boomerang-${key}`, name: `Boomerang ${label}`, short: label, isUpgrade: true, isWeapon: true, weaponId: 'boomerang', upgradeKey: key, rollImpact: (w) => w?.rollUpgradeImpact?.(key), apply: () => ps.upgradeWeaponById?.('boomerang', key) });
+      return [
+        mk('damage', 'Damage+'),
+        mk('cooldown', 'Faster Throw'),
+        mk('range', 'Range+'),
+        mk('speed', 'Throw Speed+'),
+        mk('radius', 'Hitbox Radius+'),
+        mk('projectiles', 'More Boomerangs'),
+      ];
+    },
+  },
+  {
     id: 'chainLightning',
     name: 'Chain Lightning',
     getUpgradeOptions(ps) {

@@ -4,6 +4,7 @@ import { WeaponManager } from './items/weapons/WeaponManager.js';
 import { Aura } from './items/weapons/Aura.js';
 import { Fireball } from './items/weapons/Fireball.js';
 import { Slam } from './items/weapons/Slam.js';
+import { Boomerang } from './items/weapons/Boomerang.js';
 import { ChainLightning } from './items/weapons/ChainLightning.js';
 import { EnemyManager } from './entities/enemies/EnemyManager.js';
 import { HUDScene } from './ui/HUDScene.js';
@@ -154,6 +155,17 @@ class PlayScene extends Phaser.Scene {
       });
       this.weaponManager.add(slam);
     };
+    const addBoomerang = () => {
+      const b = new Boomerang(this, this.weaponManager.context, {
+        baseCooldownMs: gameConfig.boomerang.baseCooldownMs,
+        baseDamage: gameConfig.boomerang.baseDamage,
+        range: gameConfig.boomerang.range,
+        projectileSpeed: gameConfig.boomerang.projectileSpeed,
+        radius: gameConfig.boomerang.radius,
+        pierce: gameConfig.boomerang.pierce,
+      });
+      this.weaponManager.add(b);
+    };
     const addChainLightning = () => {
       const cl = new ChainLightning(this, this.weaponManager.context, {
         baseCooldownMs: gameConfig.chainLightning.baseCooldownMs,
@@ -173,6 +185,7 @@ class PlayScene extends Phaser.Scene {
       if (owned.includes('aura')) addAura();
       if (owned.includes('fireball')) addFireball();
       if (owned.includes('slam')) addSlam();
+      if (owned.includes('boomerang')) addBoomerang();
       if (owned.includes('chainLightning')) addChainLightning();
     }
 
@@ -206,6 +219,9 @@ class PlayScene extends Phaser.Scene {
       } else if (weaponId === 'slam') {
         playerState.addWeaponById('slam');
         addSlam();
+      } else if (weaponId === 'boomerang') {
+        playerState.addWeaponById('boomerang');
+        addBoomerang();
       } else if (weaponId === 'chainLightning') {
         playerState.addWeaponById('chainLightning');
         addChainLightning();
