@@ -31,6 +31,9 @@ class PlayerStateImpl {
     this.weaponState = {};
     this._pendingLevelXpHold = false;
     this._pendingLevelXpRemainder = 0;
+    // Multi-level queue
+    this.pendingLevelUps = 0;
+    this._queuedRemainder = 0;
   }
 
   getXp() { return this.xpTotal; }
@@ -158,33 +161,42 @@ class PlayerStateImpl {
       this.xpOverflow = total - grant;
     }
     this.xpTotal += grant;
-    this.xpCurrent += grant;
-    let leveled = false;
-    // Only process one level here to avoid infinite loop when deferring clear
-    if (this.xpCurrent >= this.xpNeeded) {
-      const remainder = this.xpCurrent - this.xpNeeded;
+    // Available XP toward current and future levels (do not commit remainder yet)
+    let available = this.xpCurrent + grant;
+    let anyLeveled = false;
+    // Process potentially multiple levels and queue them
+    while (available >= this.xpNeeded) {
+      available -= this.xpNeeded;
       this.level += 1;
       // increase requirement by 1.5x each level (ceil to integer)
       this.xpNeeded = Math.ceil(this.xpNeeded * 1.5);
-      leveled = true;
-      // Defer clearing XP: keep bar full until finalize
-      this._pendingLevelXpHold = true;
-      this._pendingLevelXpRemainder = remainder;
-      this.xpCurrent = this.xpNeeded; // show full bar
+      this.pendingLevelUps = (this.pendingLevelUps || 0) + 1;
+      anyLeveled = true;
+      // Notify level change immediately (HUD badge)
+      EventBus.emit('player:level', this.level);
+      // For UI, keep bar visually full while there are pending level-ups
+      this.xpCurrent = this.xpNeeded; // display full bar for the current threshold
+    }
+    // After processing all queued levels, store final remainder for when the queue is consumed
+    this._queuedRemainder = Math.max(0, Math.floor(available));
+    if (!anyLeveled) {
+      // No new level: just update current progress
+      this.xpCurrent = Math.max(0, Math.floor(available));
     }
     EventBus.emit('xp:update', this.xpTotal);
     EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
-    if (leveled) EventBus.emit('player:level', this.level);
   }
 
   // Debug/testing: force a single level-up without XP math
   levelUpOnceDebug() {
     this.level += 1;
-    this.xpCurrent = 0;
+    this.pendingLevelUps = (this.pendingLevelUps || 0) + 1;
+    // Keep bar full for dialog
+    this.xpCurrent = this.xpNeeded;
     this.xpNeeded = Math.ceil(this.xpNeeded * 1.5);
     EventBus.emit('xp:update', this.xpTotal);
-    EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
     EventBus.emit('player:level', this.level);
+    EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
   }
 
   // Predict XP grant for a given amount using current multiplier and overflow
@@ -196,13 +208,25 @@ class PlayerStateImpl {
     return grant;
   }
 
-  finalizeLevelUp() {
-    if (!this._pendingLevelXpHold) return;
-    this.xpCurrent = Math.max(0, Math.floor(this._pendingLevelXpRemainder || 0));
-    this._pendingLevelXpHold = false;
-    this._pendingLevelXpRemainder = 0;
+  // Multi-level queue consumption: call after each selection/skip
+  consumePendingLevelUp() {
+    if (!this.pendingLevelUps || this.pendingLevelUps <= 0) return;
+    this.pendingLevelUps -= 1;
+    if (this.pendingLevelUps <= 0) {
+      // Apply final remainder to the current level's progress
+      this.xpCurrent = Math.max(0, Math.floor(this._queuedRemainder || 0));
+      this._queuedRemainder = 0;
+    } else {
+      // Keep bar full for subsequent queued dialogs
+      this.xpCurrent = this.xpNeeded;
+    }
     EventBus.emit('xp:progress', { current: this.xpCurrent, needed: this.xpNeeded, level: this.level });
   }
+
+  // Back-compat alias
+  finalizeLevelUp() { this.consumePendingLevelUp(); }
+
+  getPendingLevelUps() { return this.pendingLevelUps || 0; }
 
   // Health API (integers)
   getHealthCurrent() {
@@ -256,6 +280,8 @@ class PlayerStateImpl {
       xpCurrent: this.xpCurrent,
       xpNeeded: this.xpNeeded,
       xpOverflow: this.xpOverflow,
+      pendingLevelUps: this.pendingLevelUps,
+      queuedRemainder: this._queuedRemainder,
       healthCurrent: this.healthCurrent,
       healthMax: this.healthMax,
       shield: this.shield,
@@ -285,6 +311,8 @@ class PlayerStateImpl {
     this._recomputeStatsFromTomes();
     this._pendingLevelXpHold = !!saved.pendingLevelXpHold;
     this._pendingLevelXpRemainder = Number(saved.pendingLevelXpRemainder || 0);
+    this.pendingLevelUps = Number(saved.pendingLevelUps || 0);
+    this._queuedRemainder = Number(saved.queuedRemainder || 0);
   }
 }
 

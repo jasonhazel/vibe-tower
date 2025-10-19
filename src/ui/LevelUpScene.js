@@ -171,8 +171,8 @@ export class LevelUpScene extends Phaser.Scene {
             this.game.events.emit('tome:upgraded', t.tomeId || t.id);
           }
         }
-        // Clear deferred XP after selection
-        playerState.finalizeLevelUp?.();
+        // Consume one pending level-up and update XP bar to remainder or keep full for next queued
+        playerState.consumePendingLevelUp?.();
         this.scene.stop();
         this.scene.resume('PlayScene');
       });
@@ -180,7 +180,7 @@ export class LevelUpScene extends Phaser.Scene {
 
     // Skip button
     makeBtn(bx, y + panelH - (btnH + 16), 'Skip', () => {
-      playerState.finalizeLevelUp?.();
+      playerState.consumePendingLevelUp?.();
       this.game.events.emit('tome:skipped');
       this.scene.stop();
       this.scene.resume('PlayScene');

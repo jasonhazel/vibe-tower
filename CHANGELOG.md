@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
 ## [0.1.0] - 2025-10-19
+## [0.1.4] - 2025-10-19
+### Changed
+- Implement queued multi-level-up flow: multiple levels from one grant now open sequential dialogs.
+- HUD/LevelUp wired to consume queue and update XP bar between dialogs.
+
 ## [0.1.3] - 2025-10-19
 ### Added
 - Documentation: Proposed design for sequential multi-level-up dialogs in `docs/xp-leveling.md`.

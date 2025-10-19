@@ -367,8 +367,8 @@ class PlayScene extends Phaser.Scene {
       this.scene.launch('GameOver', { runMs: this.runMs, xpTotal: playerState.getXp(), level: playerState.getLevel?.() ?? 1 });
     }
 
-    // Handle level up: pause play and show LevelUpScene
-    if (!this._levelUpOpen && this._lastLevel !== playerState.getLevel?.()) {
+    // Handle level up: open dialog when there are pending level-ups to process
+    if (!this._levelUpOpen && (playerState.getPendingLevelUps?.() > 0)) {
       this._levelUpOpen = true;
       this._lastLevel = playerState.getLevel?.();
       this.scene.pause();
