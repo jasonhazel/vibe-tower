@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.9] - 2025-10-19
+### Changed
+- Share image height reduced to better fit content; layout tightened.
+
 ## [0.1.8] - 2025-10-19
 ### Added
 - Share image now includes player stats (area, damage, projectiles, attack speed, pickup, XP mult).
+ - Share image now also shows owned weapon and tome icons.
 
 ## [0.1.7] - 2025-10-19
 ### Added

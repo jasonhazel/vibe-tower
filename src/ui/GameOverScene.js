@@ -93,8 +93,8 @@ export class GameOverScene extends Phaser.Scene {
 
   async _shareScoreCard({ runMs, xpTotal, level }) {
     try {
-      const w = 640;
-      const h = 420; // taller to include stats
+      const w = 720;
+      const h = 420; // tighten height
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
@@ -144,6 +144,74 @@ export class GameOverScene extends Phaser.Scene {
         const v = (typeof val === 'number') ? (label === 'Projectiles' ? String(Math.floor(val)) : val.toFixed(2)) : String(val ?? '-');
         ctx.fillText(`${label}: ${v}`, colX, y2);
         y2 += 24;
+      });
+
+      // Owned weapons and tomes
+      const ws = playerState.getWeaponState?.() || {};
+      const ownedWeapons = Object.keys(ws).filter(id => (ws[id]?.level || 0) > 0);
+      const ts = playerState.getTomeState?.() || {};
+      const ownedTomes = Object.keys(ts).filter(id => (ts[id]?.level || 0) > 0);
+
+      // Section titles
+      const iconsTop = 240;
+      ctx.fillStyle = '#b0bec5';
+      ctx.font = '16px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('Weapons', left, iconsTop);
+      ctx.fillText('Tomes', colX, iconsTop);
+
+      // Helpers to draw icons on 2D canvas (approximate in-game icon styles)
+      const drawCircleStroke = (x, y, r, color, lineW = 2) => {
+        ctx.beginPath(); ctx.lineWidth = lineW; ctx.strokeStyle = color; ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+      };
+      const drawCircleFill = (x, y, r, color) => {
+        ctx.beginPath(); ctx.fillStyle = color; ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      };
+      const drawDiamond = (cx, cy, r, fill, stroke) => {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - r); ctx.lineTo(cx + r, cy); ctx.lineTo(cx, cy + r); ctx.lineTo(cx - r, cy); ctx.closePath();
+        if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+      };
+
+      const drawWeaponIcon = (id, cx, cy, size) => {
+        const r = Math.floor(size * 0.42);
+        if (id === 'aura') drawCircleStroke(cx, cy, r, '#66bb6a', 3);
+        else if (id === 'fireball') drawCircleFill(cx, cy, r, '#ff5252');
+        else if (id === 'slam') drawCircleStroke(cx, cy, r, '#ffeb3b', 3);
+        else drawCircleStroke(cx, cy, r, '#90caf9', 2);
+      };
+
+      const drawTomeIcon = (id, cx, cy, size) => {
+        const r = Math.floor(size * 0.42);
+        if (id === 'tome-area') drawCircleStroke(cx, cy, r, '#66bb6a', 2);
+        else if (id === 'tome-pickup') drawCircleStroke(cx, cy, r, '#42a5f5', 2);
+        else if (id === 'tome-damage') drawCircleFill(cx, cy, Math.floor(size * 0.32), '#ef5350');
+        else if (id === 'tome-attackSpeed') { ctx.strokeStyle = '#8bc34a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx - 8, cy); ctx.lineTo(cx, cy - 8); ctx.lineTo(cx + 8, cy); ctx.stroke(); }
+        else if (id === 'tome-projectiles') { const rr = Math.floor(size * 0.12); drawCircleFill(cx - rr * 2.5, cy, rr, '#90caf9'); drawCircleFill(cx, cy, rr, '#90caf9'); drawCircleFill(cx + rr * 2.5, cy, rr, '#90caf9'); }
+        else if (id === 'tome-xp') drawDiamond(cx, cy, Math.floor(size * 0.32), '#42a5f5', '#90caf9');
+        else drawCircleStroke(cx, cy, r, '#90caf9', 2);
+      };
+
+      // Layout icons in rows
+      const iconSize = 28;
+      const gap = 14;
+      const startWY = iconsTop + 26;
+      let wx = left + iconSize / 2;
+      let wy = startWY;
+      ownedWeapons.forEach((id, idx) => {
+        drawWeaponIcon(id, wx, wy, iconSize);
+        wx += iconSize + gap;
+        if ((idx + 1) % 6 === 0) { wx = left + iconSize / 2; wy += iconSize + gap; }
+      });
+
+      const startTY = iconsTop + 26;
+      let tx = colX + iconSize / 2;
+      let ty = startTY;
+      ownedTomes.forEach((id, idx) => {
+        drawTomeIcon(id, tx, ty, iconSize);
+        tx += iconSize + gap;
+        if ((idx + 1) % 6 === 0) { tx = colX + iconSize / 2; ty += iconSize + gap; }
       });
       // Footer
       ctx.fillStyle = '#90caf9';
