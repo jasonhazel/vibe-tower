@@ -257,9 +257,22 @@ export class HUDScene extends Phaser.Scene {
     // Debug admin: Cheat menu (upper-left) only when ?cheat=true
     try {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('cheat') === 'true') {
+      const isCheat = params.get('cheat') === 'true';
+      if (isCheat) {
         this.cheatMenu = new CheatMenu(this);
       }
+      // Toggle weapon range rings visibility based on cheat menu visibility
+      const setRingsVisible = (visible) => {
+        try {
+          const play = this.scene.get('PlayScene');
+          if (play?.weaponManager?.weapons) {
+            play.weaponManager.weapons.forEach(w => w.rangeGfx && (w.rangeGfx.visible = !!visible));
+          }
+        } catch (_) {}
+      };
+      setRingsVisible(isCheat);
+      this.game.events.on('weapon:add', () => setRingsVisible(isCheat));
+      this.game.events.on('weapons:update', () => setRingsVisible(isCheat));
     } catch (_) {}
   }
 

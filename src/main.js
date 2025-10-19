@@ -228,7 +228,10 @@ class PlayScene extends Phaser.Scene {
     window.addEventListener('visibilitychange', () => { if (document.hidden) this._saveSnapshot(); });
     // Handle weapon unlock requests from LevelUpScene
     this.game.events.on('weapon:add', (weaponId) => {
-      if (weaponId === 'fireball') {
+      if (weaponId === 'aura') {
+        playerState.addWeaponById('aura');
+        addAura();
+      } else if (weaponId === 'fireball') {
         // mark as owned and add instance
         playerState.addWeaponById('fireball');
         addFireball();

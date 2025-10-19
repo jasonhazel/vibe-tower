@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.33] - 2025-10-19
+## [0.1.34] - 2025-10-19
 ### Added
 - New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.
 ### Changed
@@ -28,6 +28,8 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Starting weapon selection: new dedicated dialog listing all weapons with no skip.
 ### Changed
 - StartWeaponScene: 4-column grid of square buttons for better density.
+### Changed
+- Weapon range rings now only display when the cheat menu is active (`?cheat=true`).
 
 ## [0.1.19] - 2025-10-19
 ### Added
