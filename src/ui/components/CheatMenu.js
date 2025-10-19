@@ -80,6 +80,14 @@ export class CheatMenu {
 
 		// Level up button below
 		makeBtn('Level Up', margin, y + 8, () => playerState.levelUpOnceDebug?.(), { bg: 0x3a3a3a, hover: 0x414b41, down: 0x2b312b, stroke: 0x8bc34a });
+		// XP grant buttons
+		y = y + 8 + bh + 6;
+		const addXpBtn = (amt, label) => makeBtn(label, margin, y, () => playerState.addXp?.(amt));
+		addXpBtn(50, '+50 XP');
+		y += bh + 6;
+		addXpBtn(100, '+100 XP');
+		y += bh + 6;
+		addXpBtn(500, '+500 XP');
 	}
 }
 

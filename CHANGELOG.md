@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
 ## [0.1.0] - 2025-10-19
+## [0.1.1] - 2025-10-19
+### Added
+- Cheat menu buttons to grant +50, +100, +500 XP for testing.
+
 ### Added
 - Rarity-based perk system with rolled impacts for tomes and weapon upgrades.
 - Weapon upgrade bundles (two stats per option) with rarity-colored outlines.
