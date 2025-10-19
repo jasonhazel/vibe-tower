@@ -16,6 +16,7 @@ import { PickupManager } from './pickups/PickupManager.js';
 import { PickupRadiusVisual } from './pickups/PickupRadiusVisual.js';
 import { hudTheme } from './ui/theme.js';
 import { SaveManager } from './state/SaveManager.js';
+import pkg from '../package.json';
 
 let GAME_WIDTH = gameConfig.width;
 let GAME_HEIGHT = gameConfig.height;
@@ -88,12 +89,16 @@ class PlayScene extends Phaser.Scene {
 
     // Run timer text (bottom above XP bar)
     this.runTimerText = this.add.text(0, 0, '00:00', { fontFamily: 'monospace', fontSize: '16px', color: '#ffffff' }).setOrigin(0.5, 1);
+    // Version text aligned with timer on Y, right aligned
+    this.versionText = this.add.text(0, 0, `v${pkg.version}`, { fontFamily: 'monospace', fontSize: '12px', color: '#b0bec5' }).setOrigin(1, 1);
     // initial placement above XP bar
     {
       const margin = hudTheme.margin; const barH = hudTheme.bar.height; const slotsSize = hudTheme.slot.size; const gap = hudTheme.gap;
       const xpY = GAME_HEIGHT - margin - slotsSize - gap - barH; // top of XP bar
       // Place timer clearly above XP bar by an additional bar height + small padding
-      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - (gap + barH + 6));
+      const ty = xpY - (gap + barH + 6);
+      this.runTimerText.setPosition(GAME_WIDTH / 2, ty);
+      this.versionText.setPosition(GAME_WIDTH - margin, ty);
     }
 
     // Enemies
@@ -257,7 +262,9 @@ class PlayScene extends Phaser.Scene {
       // position timer above XP bar
       const margin = hudTheme.margin; const barH = hudTheme.bar.height; const slotsSize = hudTheme.slot.size; const gap = hudTheme.gap; // from hudTheme
       const xpY = GAME_HEIGHT - margin - slotsSize - gap - barH; // y of top of XP bar
-      this.runTimerText.setPosition(GAME_WIDTH / 2, xpY - (gap + barH + 6));
+      const ty = xpY - (gap + barH + 6);
+      this.runTimerText.setPosition(GAME_WIDTH / 2, ty);
+      this.versionText?.setPosition(GAME_WIDTH - margin, ty);
       // update any weapons that support center updates (e.g., Fireball range ring)
       if (this.weaponManager?.weapons) {
         this.weaponManager.weapons.forEach(w => w.setCenter?.(this.centerX, this.centerY));
