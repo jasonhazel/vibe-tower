@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.30] - 2025-10-19
+## [0.1.31] - 2025-10-19
 ### Added
 - New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.
 ### Changed
@@ -24,6 +24,8 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
  - Blades: added short per-enemy contact cooldown to prevent multi-hit insta-kills when multiple blades overlap.
 ### Changed
 - Default starting weapon set to Blades for testing (was Aura).
+### Added
+- Starting weapon selection: game opens a selection dialog on start to pick your first weapon.
 
 ## [0.1.19] - 2025-10-19
 ### Added

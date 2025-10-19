@@ -191,9 +191,11 @@ class PlayScene extends Phaser.Scene {
       this.weaponManager.add(cl);
     };
     if (owned.length === 0) {
-      // Default run: start with blades only and mark as owned (testing)
-      playerState.addWeaponById('blades');
-      addBlades();
+      // Prompt for starting weapon selection
+      this._levelUpOpen = true;
+      this.scene.pause();
+      this.scene.launch('LevelUp', { chosenIds: [], maxTomes: 4, startingWeaponSelect: true });
+      // On selection, LevelUpScene emits 'weapon:add' which we handle below
     } else {
       if (owned.includes('aura')) addAura();
       if (owned.includes('fireball')) addFireball();

@@ -30,7 +30,7 @@ export const gameConfig = {
   boomerang: {
     baseDamage: 12,
     baseCooldownMs: 1300,
-    range: 81,
+    range: 100,
     projectileSpeed: 220,
     radius: 6,
     pierce: 2,
