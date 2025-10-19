@@ -74,6 +74,8 @@ export class Boomerang extends WeaponBase {
       // position along line from origin->target at fraction u
       p.x = p.ox + (p.tx - p.ox) * u;
       p.y = p.oy + (p.ty - p.oy) * u;
+      // spin for visual flair
+      p.rotation = (p.rotation || 0) + (p.rotSpeed || 0) * deltaMs;
       // collision on both legs
       this._checkHit(p, rp);
       if (tt >= 2) {
@@ -107,13 +109,26 @@ export class Boomerang extends WeaponBase {
   }
 
   _spawnBoomerang(ox, oy, tx, ty, rp) {
-    const g = this.scene.add.circle(ox, oy, rp.radius, 0xffd54f);
+    const g = this.scene.add.graphics();
+    g.x = ox; g.y = oy;
+    // draw boomerang-shaped arc centered at (0,0); rotation will spin around center
+    this._drawBoomerangShape(g, rp.radius);
     g.ox = ox; g.oy = oy; g.tx = tx; g.ty = ty;
     g.totalDist = Math.hypot(tx - ox, ty - oy);
     g.speed = rp.projectileSpeed / 1000; // per ms scaled
     g.t = 0; // 0..2
     g.pierceLeft = rp.pierce;
+    g.rotSpeed = (Math.PI * 2) / 800; // one rotation per 800ms
     this.projectiles.add(g);
+  }
+
+  _drawBoomerangShape(g, radius) {
+    g.clear();
+    g.lineStyle(3, 0xffc107, 1);
+    const r = Math.max(2, Math.floor(radius));
+    g.beginPath();
+    g.arc(0, 0, r, Math.PI * 0.2, Math.PI * 1.2, false);
+    g.strokePath();
   }
 
   _checkHit(p, rp) {

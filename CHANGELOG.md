@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## [0.1.22] - 2025-10-19
+## [0.1.23] - 2025-10-19
 ### Added
 - New weapon: Boomerang (piercing returning projectile; upgrades: Damage, Cooldown, Range, Speed, Radius, Projectiles). Wired into catalog, scene, cheat menu, stats panel.
 ### Changed
 - Boomerang now always travels to max range before returning.
  - Boomerang will not throw if no target is within range.
+ - Boomerang projectile now uses boomerang-shaped graphic and spins in flight.
 
 ## [0.1.19] - 2025-10-19
 ### Added
