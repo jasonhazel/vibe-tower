@@ -23,22 +23,24 @@ export class StartWeaponScene extends Phaser.Scene {
 
     this.add.text(w / 2, y + 18, 'Choose Your Weapon', { fontFamily: 'monospace', fontSize: '18px', color: '#ffffff' }).setOrigin(0.5);
 
-    const bw = Math.min(440, panelW - 40);
-    const btnH = 78; const btnGap = 12; const cols = 1;
-    const bx = Math.floor(w / 2 - bw / 2);
-    let by = y + 54;
+    // Grid layout (4 columns) of square buttons
+    const gap = 12;
+    const cols = 4;
+    const cell = Math.floor((panelW - 40 - gap * (cols - 1)) / cols);
+    const startX = x + 20;
+    let row = 0, col = 0;
 
     const weapons = WeaponCatalog;
     weapons.forEach((meta, i) => {
+      const cx = startX + col * (cell + gap);
+      const cy = y + 54 + row * (cell + gap);
       const title = meta.name;
-      const line2 = '';
-      const line3 = '';
-      const btn = new PerkButton(this, { x: bx, y: by, width: bw, height: btnH, title, line2, line3, onClick: () => {
+      const btn = new PerkButton(this, { x: cx, y: cy, width: cell, height: cell, title, line2: '', line3: '', onClick: () => {
         playerState.addWeaponById?.(meta.id);
         this.game.events.emit('weapon:add', meta.id);
         this.scene.stop();
       }});
-      by += btnH + btnGap;
+      col += 1; if (col >= cols) { col = 0; row += 1; }
     });
   }
 }
