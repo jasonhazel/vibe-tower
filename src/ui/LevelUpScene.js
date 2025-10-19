@@ -174,7 +174,6 @@ export class LevelUpScene extends Phaser.Scene {
         // Consume one pending level-up and update XP bar to remainder or keep full for next queued
         playerState.consumePendingLevelUp?.();
         this.scene.stop();
-        this.scene.resume('PlayScene');
       });
     });
 
@@ -183,7 +182,6 @@ export class LevelUpScene extends Phaser.Scene {
       playerState.consumePendingLevelUp?.();
       this.game.events.emit('tome:skipped');
       this.scene.stop();
-      this.scene.resume('PlayScene');
     });
   }
 }

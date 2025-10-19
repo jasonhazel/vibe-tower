@@ -292,11 +292,18 @@ class PlayScene extends Phaser.Scene {
       this.scene.restart();
     });
 
-    // Save immediately on perk selections/unlocks/upgrades
-    this.game.events.on('tome:selected', () => { this._pendingLevelUp = false; this._saveSnapshot(); });
-    this.game.events.on('tome:upgraded', () => { this._pendingLevelUp = false; this._saveSnapshot(); });
-    this.game.events.on('weapon:add', () => { this._pendingLevelUp = false; this._saveSnapshot(); });
-    this.game.events.on('weapon:upgraded', () => { this._pendingLevelUp = false; this._saveSnapshot(); });
+    // Save only when queue is empty; defer heavy save to next tick to avoid frame hitch
+    const maybeSaveAfterLevel = () => {
+      this._pendingLevelUp = false;
+      try {
+        if (playerState.getPendingLevelUps?.() > 0) return;
+        setTimeout(() => this._saveSnapshot(), 0);
+      } catch (_) {}
+    };
+    this.game.events.on('tome:selected', maybeSaveAfterLevel);
+    this.game.events.on('tome:upgraded', maybeSaveAfterLevel);
+    this.game.events.on('weapon:add', maybeSaveAfterLevel);
+    this.game.events.on('weapon:upgraded', maybeSaveAfterLevel);
   }
 
   update(time, delta) {
