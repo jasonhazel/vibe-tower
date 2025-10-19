@@ -36,7 +36,7 @@ export const gameConfig = {
     pierce: 2,
   },
   blades: {
-    baseDamage: 6,
+    baseDamage: 10,
     baseCooldownMs: 250,
     orbitRadius: 83,
     rotationSpeed: 180,

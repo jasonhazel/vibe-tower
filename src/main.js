@@ -191,9 +191,9 @@ class PlayScene extends Phaser.Scene {
       this.weaponManager.add(cl);
     };
     if (owned.length === 0) {
-      // Default run: start with aura only and mark as owned
-      playerState.addWeaponById('aura');
-      addAura();
+      // Default run: start with blades only and mark as owned (testing)
+      playerState.addWeaponById('blades');
+      addBlades();
     } else {
       if (owned.includes('aura')) addAura();
       if (owned.includes('fireball')) addFireball();
