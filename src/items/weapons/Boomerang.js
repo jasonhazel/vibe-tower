@@ -96,7 +96,12 @@ export class Boomerang extends WeaponBase {
       let targetX, targetY;
       if (enemies.length > 0) {
         const e = enemies[Math.floor(Math.random() * enemies.length)];
-        targetX = e.x; targetY = e.y;
+        // Aim in the direction of the chosen enemy but extend to exact max range
+        const dx = e.x - centerX; const dy = e.y - centerY;
+        const len = Math.hypot(dx, dy) || 1;
+        const ux = dx / len; const uy = dy / len;
+        targetX = centerX + ux * rp.range;
+        targetY = centerY + uy * rp.range;
       } else {
         const ang = Math.random() * Math.PI * 2;
         targetX = centerX + Math.cos(ang) * rp.range;
